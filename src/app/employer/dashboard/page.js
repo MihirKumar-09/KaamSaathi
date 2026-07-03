@@ -1,4 +1,4 @@
-import EmployerDashboard from "@/components/EmployerDashboard/EmployerDashboard";
+import EmployerDashboard from "@/components/Employer/EmployerDashboard";
 export default function Dashboard() {
   return (
     <>

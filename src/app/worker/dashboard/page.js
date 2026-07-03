@@ -1,4 +1,4 @@
-import WorkerDashboard from "@/components/WorkerDashboard/WorkerDashboard";
+import WorkerDashboard from "@/components/Worker/WorkerDashboard";
 export default function Dashboard() {
   return (
     <>
