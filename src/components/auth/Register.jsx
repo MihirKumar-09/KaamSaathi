@@ -12,6 +12,7 @@ import {
   Briefcase,
   Check,
 } from "lucide-react";
+import Image from "next/image";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -28,32 +29,15 @@ export default function Register() {
   };
 
   return (
-    <div className="fixed inset-0 w-screen h-screen overflow-y-auto lg:overflow-hidden bg-slate-950 flex flex-col lg:flex-row">
+    <div className="fixed inset-0 w-screen h-screen overflow-y-auto lg:overflow-hidden bg-[#09090f] flex flex-col lg:flex-row">
       {/* LEFT SIDE — FORM */}
-      <div className="relative w-full lg:w-[45%] flex items-center justify-center px-6 py-10 sm:px-10 lg:px-16 bg-slate-950">
+      <div className="relative w-full lg:w-[45%] flex items-center justify-center px-6 py-10 sm:px-10 lg:px-16">
         {/* Decorative blurred blobs */}
-        <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-fuchsia-600/30 blur-[100px]" />
-        <div className="pointer-events-none absolute bottom-0 -left-10 h-64 w-64 rounded-full bg-indigo-600/30 blur-[100px]" />
-        <div className="pointer-events-none absolute top-1/3 right-0 h-48 w-48 rounded-full bg-cyan-500/20 blur-[90px]" />
+        <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full blur-[100px]" />
+        <div className="pointer-events-none absolute bottom-0 -left-10 h-64 w-64 rounded-full blur-[100px]" />
+        <div className="pointer-events-none absolute top-1/3 right-0 h-48 w-48 rounded-full blur-[90px]" />
 
         <div className="relative z-10 w-full max-w-md">
-          {/* Logo / Brand */}
-          <div className="mb-8 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-fuchsia-500 to-indigo-600 shadow-lg shadow-fuchsia-500/30">
-              <span className="text-lg font-bold text-white">N</span>
-            </div>
-            <span className="text-xl font-semibold tracking-tight text-white">
-              Nova
-            </span>
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-            Create your account
-          </h1>
-          <p className="mt-2 text-sm text-slate-400">
-            Join thousands of teams already building with Nova.
-          </p>
-
           {/* Glass form card */}
           <form className="mt-8 space-y-5 rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 shadow-2xl shadow-black/40 backdrop-blur-2xl">
             {/* Profile image upload */}
@@ -249,90 +233,109 @@ export default function Register() {
 
       {/* RIGHT SIDE — HERO */}
       <div className="relative hidden lg:block lg:w-[55%] h-screen overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1600&auto=format&fit=crop"
-          alt="Team collaborating"
-          className="absolute inset-0 h-full w-full object-cover"
+        {/* Background Image */}
+        <Image
+          src="/auth/hero.jpeg"
+          alt="KaamSaathi Hero"
+          fill
+          priority
+          className="object-cover scale-110 blur-[3px] brightness-[0.55]"
         />
 
-        {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-linear-to-br from-indigo-900/70 via-fuchsia-900/50 to-slate-950/80" />
-        <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-transparent to-transparent" />
+        {/* Dark Gradient */}
+        <div className="absolute inset-0 bg-linear-to-br from-[#09090f]/70 via-[#16162b]/50 to-[#05060b]/90" />
 
-        {/* Decorative blurred blobs */}
-        <div className="pointer-events-none absolute top-10 right-10 h-72 w-72 rounded-full bg-fuchsia-400/20 blur-[110px]" />
-        <div className="pointer-events-none absolute bottom-32 left-10 h-80 w-80 rounded-full bg-indigo-400/20 blur-[120px]" />
+        {/* Bottom Fade */}
+        <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent" />
 
-        {/* Liquid SVG wave divider */}
+        {/* Purple Glow */}
+        <div className="absolute top-20 right-10 h-105 w-105 rounded-full bg-violet-600/20 blur-[140px]" />
+
+        {/* Blue Glow */}
+        <div className="absolute bottom-10 left-10 h-87.5 w-87.5 rounded-full bg-cyan-500/15 blur-[130px]" />
+
+        {/* Liquid Divider */}
         <svg
-          className="absolute -left-1 top-0 h-full w-24 text-slate-950"
+          className="absolute -left-px top-0 h-full w-24 z-20"
           viewBox="0 0 100 800"
           preserveAspectRatio="none"
-          xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M0,0
-               C 40,80 10,160 30,240
-               C 55,320 10,400 30,480
-               C 50,560 10,640 30,720
-               C 40,760 20,780 0,800
-               L0,0 Z"
-            fill="currentColor"
+            d="
+      M0,0
+      C40,90 5,170 28,250
+      C55,330 5,420 28,500
+      C55,580 5,660 28,740
+      C35,775 18,790 0,800
+      L0,0 Z"
+            fill="#09090f"
           />
         </svg>
 
         {/* Content */}
-        <div className="relative z-10 flex h-full flex-col justify-between p-12 xl:p-16">
-          <div className="flex justify-end">
-            <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-medium text-white backdrop-blur-md">
-              Trusted by 12,000+ teams
-            </span>
-          </div>
+        <div className="relative z-20 flex h-full flex-col justify-between px-16 py-20">
+          {/* Hero Text */}
+          <div className="max-w-xl">
+            <h1 className="text-6xl xl:text-7xl font-black leading-[0.95] tracking-tight">
+              <span className="text-white drop-shadow-[0_8px_40px_rgba(0,0,0,.7)]">
+                Welcome to
+              </span>
 
-          <div className="max-w-lg">
-            <h2 className="text-4xl xl:text-5xl font-bold leading-tight tracking-tight text-white">
-              Build something
               <br />
-              extraordinary today.
-            </h2>
-            <p className="mt-4 text-base xl:text-lg text-white/80">
-              Join a growing community of creators, teams, and businesses
-              scaling their workflow with Nova's all-in-one platform.
+
+              <span className="bg-linear-to-r from-fuchsia-500 via-violet-400 to-cyan-400 bg-clip-text text-transparent">
+                KaamSaathi
+              </span>
+            </h1>
+
+            <p className="mt-8 text-lg leading-8 text-slate-300 max-w-lg">
+              Connecting skilled workers with trusted employers across India.
+              Find jobs faster, hire confidently, and build your future with
+              KaamSaathi.
             </p>
           </div>
 
-          {/* Floating glass stat cards */}
-          <div className="grid grid-cols-3 gap-4">
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-5">
             {[
-              { label: "Active users", value: "48K+" },
-              { label: "Countries", value: "120+" },
-              { label: "Uptime", value: "99.9%" },
-            ].map((stat) => (
+              {
+                value: "48K+",
+                label: "Workers",
+              },
+              {
+                value: "12K+",
+                label: "Employers",
+              },
+              {
+                value: "99.9%",
+                label: "Success Rate",
+              },
+            ].map((item) => (
               <div
-                key={stat.label}
-                className="group rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl shadow-xl shadow-black/20 transition duration-300 hover:-translate-y-1 hover:bg-white/15"
+                key={item.label}
+                className="rounded-3xl border border-white/10 bg-white/10 backdrop-blur-2xl p-6 transition-all duration-300 hover:-translate-y-2 hover:bg-white/15"
               >
-                <p className="text-2xl font-bold text-white">{stat.value}</p>
-                <p className="mt-1 text-xs text-white/70">{stat.label}</p>
+                <h2 className="text-4xl font-bold text-white">{item.value}</h2>
+
+                <p className="mt-2 text-slate-300">{item.label}</p>
               </div>
             ))}
           </div>
 
-          {/* Feature checklist */}
-          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
+          {/* Features */}
+          <div className="flex flex-wrap gap-6">
             {[
-              "No credit card required",
-              "Free 14-day trial",
-              "Cancel anytime",
+              "Verified Workers",
+              "Trusted Employers",
+              "Quick Hiring",
+              "24×7 Support",
             ].map((item) => (
-              <div
-                key={item}
-                className="flex items-center gap-2 text-sm text-white/80"
-              >
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15">
-                  <Check className="h-3 w-3 text-emerald-300" />
-                </span>
-                {item}
+              <div key={item} className="flex items-center gap-3 text-white/80">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/20">
+                  <Check className="h-4 w-4 text-emerald-400" />
+                </div>
+
+                <span>{item}</span>
               </div>
             ))}
           </div>
