@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^[6-9]\d{9}$/, "Invalid phone number"],
     },
+    gender: {
+      type: String,
+      required: true,
+      enum: ["Male", "Female"],
+    },
     location: {
       state: {
         type: String,
