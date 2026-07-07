@@ -20,10 +20,13 @@ import {
   Rocket,
   CheckCheckIcon,
   Heart,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 export default function Register() {
+  const [showPassword, setShowPassword] = useState(false);
   const [location, setLocation] = useState({
     state: "",
     district: "",
@@ -259,10 +262,17 @@ export default function Register() {
               />
 
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Create password"
                 className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 outline-none backdrop-blur-xl transition focus:border-cyan-400 focus:bg-white/70"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-state-500 transition hover:text-cyan-600 cursor-pointer"
+              >
+                {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+              </button>
             </div>
           </div>
           <div className="mb-4">
