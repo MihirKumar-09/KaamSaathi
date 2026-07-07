@@ -16,7 +16,6 @@ import {
   Phone,
   Lock,
   MapPin,
-  ImagePlus,
   Rocket,
   CheckCheckIcon,
   Heart,
@@ -179,31 +178,59 @@ export default function Register() {
             </p>
           </div>
         </div>
+        {/* Wave Divider */}
+        <svg
+          className="absolute -right-1 top-0 z-20 h-full w-24 text-[#111827]"
+          viewBox="0 0 100 800"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M100,0
+       C60,80 90,160 70,240
+       C45,320 90,400 70,480
+       C50,560 90,640 70,720
+       C60,760 80,780 100,800
+       L100,0 Z"
+            fill="currentColor"
+          />
+        </svg>
       </div>
       {/* Right Section */}
-      <div className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-linear-to-br from-slate-100 via-blue-50 to-indigo-100 px-10 md:w-[55%]">
-        {/* Glow */}
-        <div className="absolute -left-32 top-24 h-72 w-72 rounded-full bg-black-300/30 blur-3xl"></div>
-        <div className="absolute bottom-10 right-10 h-80 w-80 rounded-full bg-violet-400/20 blur-3xl"></div>
-
+      <div className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-[#111827] px-10 md:w-[55%]">
         {/* Glass Card */}
-        <div className="relative z-10 w-full max-w-2xl rounded-4xl border border-white/50 bg-white/45 p-8 shadow-[0_20px_80px_rgba(31,41,55,0.18)] backdrop-blur-3xl">
+        <div
+          className="relative z-10 w-full max-w-2xl overflow-hidden rounded-[34px]
+border border-white/10
+bg-linear-to-br from-white/8 via-white/5 to-white/2
+shadow-[0_25px_80px_rgba(0,0,0,0.65)]
+backdrop-blur-[35px]
+before:absolute before:inset-0
+before:rounded-[34px]
+before:border before:border-white/10
+before:bg-linear-to-br
+before:from-white/8
+before:via-transparent
+before:to-white/2
+before:pointer-events-none
+p-8"
+        >
           {/* Full Name */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
+            <label className="mb-2 block text-sm font-semibold text-slate-200">
               Full Name
             </label>
 
             <div className="relative">
               <User
                 size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
               />
 
               <input
                 type="text"
                 placeholder="Enter your full name"
-                className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 text-slate-800 placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/70 focus:ring-4 focus:ring-cyan-200/50"
+                className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10 focus:ring-2 focus:ring-cyan-400/30"
               />
             </div>
           </div>
@@ -211,39 +238,39 @@ export default function Register() {
           {/* Email + Phone */}
           <div className="mb-4 grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
+              <label className="mb-2 block text-sm font-semibold text-slate-200">
                 Email
               </label>
 
               <div className="relative">
                 <Mail
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
                 />
 
                 <input
                   type="email"
                   placeholder="Email"
-                  className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 outline-none backdrop-blur-xl transition focus:border-cyan-400 focus:bg-white/70"
+                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
                 />
               </div>
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
+              <label className="mb-2 block text-sm font-semibold text-slate-200">
                 Phone
               </label>
 
               <div className="relative">
                 <Phone
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
                 />
 
                 <input
                   type="text"
                   placeholder="Phone"
-                  className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 outline-none backdrop-blur-xl transition focus:border-cyan-400 focus:bg-white/70"
+                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
                 />
               </div>
             </div>
@@ -251,150 +278,154 @@ export default function Register() {
 
           {/* Password */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
+            <label className="mb-2 block text-sm font-semibold text-slate-200">
               Password
             </label>
 
             <div className="relative">
               <Lock
                 size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
               />
 
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Create password"
-                className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 outline-none backdrop-blur-xl transition focus:border-cyan-400 focus:bg-white/70"
+                className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-12 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
               />
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-state-500 transition hover:text-cyan-600 cursor-pointer"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-cyan-400"
               >
                 {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
               </button>
             </div>
           </div>
+
+          {/* Current Location */}
           <div className="mb-4">
             <button
               type="button"
               onClick={getCurrentLocation}
-              className="mt-2 flex items-center gap-2 text-sm font-medium text-cyan-700 hover:text-cyan-900 cursor-pointer"
+              className="flex cursor-pointer items-center gap-2 text-sm font-medium text-cyan-400 transition hover:text-cyan-300"
             >
               <MapPin size={16} />
               Use Current Location
             </button>
           </div>
 
-          {/* Location + Upload */}
+          {/* Address */}
           <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* State */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
+              <label className="mb-2 block text-sm font-semibold text-slate-200">
                 State
               </label>
 
               <div className="relative">
                 <MapPin
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
                 />
 
                 <input
                   type="text"
-                  placeholder="Enter your state"
                   value={location.state}
                   onChange={(e) =>
                     setLocation({ ...location, state: e.target.value })
                   }
-                  className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 text-slate-800 placeholder:text-slate-400 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/70"
+                  placeholder="Enter your state"
+                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
                 />
               </div>
             </div>
 
             {/* District */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
+              <label className="mb-2 block text-sm font-semibold text-slate-200">
                 District
               </label>
 
               <div className="relative">
                 <MapPin
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
                 />
 
                 <input
                   type="text"
-                  placeholder="Enter your district"
                   value={location.district}
                   onChange={(e) =>
                     setLocation({ ...location, district: e.target.value })
                   }
-                  className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 text-slate-800 placeholder:text-slate-400 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/70"
+                  placeholder="Enter your district"
+                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
                 />
               </div>
             </div>
 
             {/* City */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
+              <label className="mb-2 block text-sm font-semibold text-slate-200">
                 City
               </label>
 
               <div className="relative">
                 <MapPin
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
                 />
 
                 <input
                   type="text"
-                  placeholder="Enter your city"
                   value={location.city}
                   onChange={(e) =>
                     setLocation({ ...location, city: e.target.value })
                   }
-                  className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 text-slate-800 placeholder:text-slate-400 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/70"
+                  placeholder="Enter your city"
+                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
                 />
               </div>
             </div>
 
             {/* Pincode */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
+              <label className="mb-2 block text-sm font-semibold text-slate-200">
                 Pincode
               </label>
 
               <div className="relative">
                 <MapPin
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
                 />
 
                 <input
                   type="text"
                   inputMode="numeric"
                   maxLength={6}
-                  placeholder="Enter pincode"
                   value={location.pincode}
                   onChange={(e) =>
                     setLocation({ ...location, pincode: e.target.value })
                   }
-                  className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 text-slate-800 placeholder:text-slate-400 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/70"
+                  placeholder="Enter pincode"
+                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
                 />
               </div>
             </div>
           </div>
 
-          <button className="h-12 w-full rounded-xl bg-linear-to-r from-[#312A2A] via-[#1D1612] to-[#040609] font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl cursor-pointer">
+          {/* Button */}
+          <button className="h-12 w-full rounded-xl bg-linear-to-r from-cyan-500 via-blue-600 to-violet-600 font-semibold text-white shadow-lg shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-cyan-500/40">
             Create Account
           </button>
 
           <Link href="/login">
-            <p className="mt-5 text-center text-sm text-slate-600">
+            <p className="mt-5 text-center text-sm text-slate-400">
               Already have an account?{" "}
-              <span className="cursor-pointer font-semibold text-cyan-700 hover:text-blue-700">
+              <span className="font-semibold text-cyan-400 hover:text-cyan-300">
                 Login
               </span>
             </p>
