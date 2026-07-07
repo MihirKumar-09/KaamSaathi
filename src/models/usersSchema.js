@@ -68,16 +68,6 @@ const userSchema = new mongoose.Schema(
         },
       },
     },
-    profileImage: {
-      url: {
-        type: String,
-        default: "/avatar/profile.webp",
-      },
-      publicId: {
-        type: String,
-        default: "",
-      },
-    },
   },
   { timestamps: true },
 );

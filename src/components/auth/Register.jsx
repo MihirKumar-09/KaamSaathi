@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import { Unbounded } from "next/font/google";
 const unbounded = Unbounded({
@@ -21,7 +22,88 @@ import {
   Heart,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 export default function Register() {
+  const [location, setLocation] = useState({
+    state: "",
+    district: "",
+    city: "",
+    pincode: "",
+  });
+
+  const getCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+
+          console.log("Latitude:", latitude);
+          console.log("Longitude:", longitude);
+
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch location");
+          }
+
+          const data = await response.json();
+
+          console.log(data);
+
+          setLocation({
+            state: data.address.state || "",
+            district:
+              data.address.state_district ||
+              data.address.county ||
+              data.address.city_district ||
+              "",
+            city:
+              data.address.city ||
+              data.address.town ||
+              data.address.village ||
+              "",
+            pincode: data.address.postcode || "",
+          });
+        } catch (error) {
+          console.error(error);
+          alert("Unable to fetch address.");
+        }
+      },
+      (error) => {
+        console.error(error);
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            alert("Location permission denied.");
+            break;
+
+          case error.POSITION_UNAVAILABLE:
+            alert("Location unavailable.");
+            break;
+
+          case error.TIMEOUT:
+            alert("Location request timed out.");
+            break;
+
+          default:
+            alert("Something went wrong.");
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    );
+  };
+
   return (
     <div className="h-screen w-full flex flex-col items-center  md:flex-row">
       {/* Left Container */}
@@ -103,21 +185,6 @@ export default function Register() {
 
         {/* Glass Card */}
         <div className="relative z-10 w-full max-w-2xl rounded-4xl border border-white/50 bg-white/45 p-8 shadow-[0_20px_80px_rgba(31,41,55,0.18)] backdrop-blur-3xl">
-          {/* Heading */}
-          <div className="mb-8">
-            <span className="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-cyan-700">
-              Join KaamSaathi
-            </span>
-
-            <h2 className="mt-4 text-4xl font-bold text-slate-900">
-              Create Your Account
-            </h2>
-
-            <p className="mt-2 text-slate-600">
-              Start your journey and build your career with confidence.
-            </p>
-          </div>
-
           {/* Full Name */}
           <div className="mb-4">
             <label className="mb-2 block text-sm font-semibold text-slate-700">
@@ -198,12 +265,23 @@ export default function Register() {
               />
             </div>
           </div>
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={getCurrentLocation}
+              className="mt-2 flex items-center gap-2 text-sm font-medium text-cyan-700 hover:text-cyan-900 cursor-pointer"
+            >
+              <MapPin size={16} />
+              Use Current Location
+            </button>
+          </div>
 
           {/* Location + Upload */}
-          <div className="mb-6 grid grid-cols-2 gap-4">
+          <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* State */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Location
+                State
               </label>
 
               <div className="relative">
@@ -214,22 +292,88 @@ export default function Register() {
 
                 <input
                   type="text"
-                  placeholder="Location"
-                  className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 outline-none backdrop-blur-xl transition focus:border-cyan-400 focus:bg-white/70"
+                  placeholder="Enter your state"
+                  value={location.state}
+                  onChange={(e) =>
+                    setLocation({ ...location, state: e.target.value })
+                  }
+                  className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 text-slate-800 placeholder:text-slate-400 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/70"
                 />
               </div>
             </div>
 
+            {/* District */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Profile Image
+                District
               </label>
 
-              <label className="flex h-12 cursor-pointer items-center justify-center rounded-xl border border-dashed border-cyan-400/50 bg-white/40 font-medium text-cyan-700 backdrop-blur-xl transition hover:bg-white/60">
-                <ImagePlus size={18} className="mr-2" />
-                Upload
-                <input type="file" className="hidden" />
+              <div className="relative">
+                <MapPin
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600"
+                />
+
+                <input
+                  type="text"
+                  placeholder="Enter your district"
+                  value={location.district}
+                  onChange={(e) =>
+                    setLocation({ ...location, district: e.target.value })
+                  }
+                  className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 text-slate-800 placeholder:text-slate-400 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/70"
+                />
+              </div>
+            </div>
+
+            {/* City */}
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                City
               </label>
+
+              <div className="relative">
+                <MapPin
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600"
+                />
+
+                <input
+                  type="text"
+                  placeholder="Enter your city"
+                  value={location.city}
+                  onChange={(e) =>
+                    setLocation({ ...location, city: e.target.value })
+                  }
+                  className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 text-slate-800 placeholder:text-slate-400 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/70"
+                />
+              </div>
+            </div>
+
+            {/* Pincode */}
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Pincode
+              </label>
+
+              <div className="relative">
+                <MapPin
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600"
+                />
+
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="Enter pincode"
+                  value={location.pincode}
+                  onChange={(e) =>
+                    setLocation({ ...location, pincode: e.target.value })
+                  }
+                  className="h-12 w-full rounded-xl border border-white/60 bg-white/50 pl-12 pr-4 text-slate-800 placeholder:text-slate-400 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/70"
+                />
+              </div>
             </div>
           </div>
 
