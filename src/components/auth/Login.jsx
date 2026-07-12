@@ -3,9 +3,58 @@
 import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
+  const router = useRouter();
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      setLoading(false);
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message);
+        return;
+      }
+
+      alert(data.message);
+
+      if (data.role === "worker") {
+        router.push("/worker/dashboard");
+      } else {
+        router.push("/employer/dashboard");
+      }
+    } catch (err) {
+      console.log(err);
+      alert("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 flex h-screen w-screen flex-col overflow-y-auto bg-slate-950 lg:flex-row lg:overflow-hidden">
@@ -21,7 +70,10 @@ export default function Login() {
           </p>
 
           {/* Login Card */}
-          <form className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40 backdrop-blur-2xl sm:p-8">
+          <form
+            onSubmit={handleSubmit}
+            className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40 backdrop-blur-2xl sm:p-8"
+          >
             {/* Email */}
             <div className="mb-5">
               <label className="mb-2 block text-sm font-medium text-slate-200">
@@ -35,6 +87,9 @@ export default function Login() {
                   type="email"
                   placeholder="Enter your email"
                   className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-3 text-sm text-white placeholder:text-slate-500 outline-none transition duration-300 focus:border-fuchsia-400/60 focus:bg-white/10 focus:ring-2 focus:ring-fuchsia-500/30"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -52,6 +107,9 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-11 text-sm text-white placeholder:text-slate-500 outline-none transition duration-300 focus:border-fuchsia-400/60 focus:bg-white/10 focus:ring-2 focus:ring-fuchsia-500/30"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
                 />
 
                 <button
@@ -71,9 +129,10 @@ export default function Login() {
             {/* Login Button */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full rounded-xl bg-linear-to-r from-fuchsia-500 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-fuchsia-500/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-fuchsia-500/40 active:scale-[0.98]"
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
 
             {/* Register Link */}
