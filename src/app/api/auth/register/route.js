@@ -1,15 +1,25 @@
 import User from "@/models/usersSchema";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
+import { connectDB } from "@/lib/db";
 
 export async function POST(req) {
   try {
+    await connectDB();
     const { name, email, phone, password, gender, location } = await req.json();
 
     // check existing user;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return NextResponse.json({ message: "User already exist" });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "User already exists",
+        },
+        { status: 409 },
+      );
     }
 
     // Hash password;
@@ -25,12 +35,29 @@ export async function POST(req) {
       location,
     });
 
-    // Create JWT token;
-    const token = jwt.sign({ userId: user._id }, "secret", {
+    // Generate JWT
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
-    resizeBy.cookies("token", token);
-    return NextResponse.json({ message: "SignUp Successfully" });
+
+    // Set Cookie
+    const cookieStore = await cookies();
+
+    cookieStore.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24,
+      path: "/",
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Signup Successfully",
+      },
+      { status: 201 },
+    );
   } catch (err) {
     return NextResponse.json(
       {

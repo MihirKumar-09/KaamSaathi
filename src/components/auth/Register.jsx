@@ -24,14 +24,43 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 export default function Register() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [location, setLocation] = useState({
-    state: "",
-    district: "",
-    city: "",
-    pincode: "",
+  const router = useRouter();
+  const [forms, setForms] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    gender: "",
+    location: {
+      state: "",
+      district: "",
+      city: "",
+      pincode: "",
+    },
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForms((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  const handleLocationChange = (e) => {
+    const { name, value } = e.target;
+
+    setForms((prev) => ({
+      ...prev,
+      location: {
+        ...prev.location,
+        [name]: value,
+      },
+    }));
+  };
 
   const getCurrentLocation = async () => {
     if (!navigator.geolocation) {
@@ -57,22 +86,25 @@ export default function Register() {
 
           const data = await response.json();
 
-          console.log(data);
+          console.log(Object.keys(data.address));
 
-          setLocation({
-            state: data.address.state || "",
-            district:
-              data.address.state_district ||
-              data.address.county ||
-              data.address.city_district ||
-              "",
-            city:
-              data.address.city ||
-              data.address.town ||
-              data.address.village ||
-              "",
-            pincode: data.address.postcode || "",
-          });
+          setForms((prev) => ({
+            ...prev,
+            location: {
+              state: data.address.state || "",
+              district:
+                data.address.state_district ||
+                data.address.county ||
+                data.address.city_district ||
+                "",
+              city:
+                data.address.city ||
+                data.address.town ||
+                data.address.village ||
+                "",
+              pincode: data.address.postcode || "",
+            },
+          }));
         } catch (error) {
           console.error(error);
           alert("Unable to fetch address.");
@@ -104,6 +136,33 @@ export default function Register() {
         maximumAge: 0,
       },
     );
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(forms),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message);
+        return;
+      }
+      alert(data.message);
+      router.push("/");
+    } catch (err) {
+      console.log(err);
+      alert("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -215,221 +274,264 @@ before:to-white/2
 before:pointer-events-none
 p-8"
         >
-          {/* Full Name */}
-          <div className="mb-4">
-            <label className="mb-2 block text-sm font-semibold text-slate-200">
-              Full Name
-            </label>
-
-            <div className="relative">
-              <User
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
-              />
-
-              <input
-                type="text"
-                placeholder="Enter your full name"
-                className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10 focus:ring-2 focus:ring-cyan-400/30"
-              />
-            </div>
-          </div>
-
-          {/* Email + Phone */}
-          <div className="mb-4 grid grid-cols-2 gap-4">
-            <div>
+          <form onSubmit={handleSubmit}>
+            {/* Full Name */}
+            <div className="mb-4">
               <label className="mb-2 block text-sm font-semibold text-slate-200">
-                Email
+                Full Name
               </label>
 
               <div className="relative">
-                <Mail
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
-                />
-
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-200">
-                Phone
-              </label>
-
-              <div className="relative">
-                <Phone
+                <User
                   size={18}
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
                 />
 
                 <input
                   type="text"
-                  placeholder="Phone"
-                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
+                  placeholder="Enter your full name"
+                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10 focus:ring-2 focus:ring-cyan-400/30"
+                  name="name"
+                  value={forms.name}
+                  onChange={handleChange}
                 />
               </div>
             </div>
-          </div>
 
-          {/* Password */}
-          <div className="mb-4">
-            <label className="mb-2 block text-sm font-semibold text-slate-200">
-              Password
-            </label>
+            {/* Email + Phone */}
+            <div className="mb-4 grid grid-cols-2 gap-4">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-200">
+                  Email
+                </label>
 
-            <div className="relative">
-              <Lock
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
-              />
+                <div className="relative">
+                  <Mail
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
+                  />
 
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Create password"
-                className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-12 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
-              />
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
+                    name="email"
+                    value={forms.email}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
 
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-200">
+                  Phone
+                </label>
+
+                <div className="relative">
+                  <Phone
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Phone"
+                    className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
+                    name="phone"
+                    value={forms.phone}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="mb-4">
+              <label className="mb-2 block text-sm font-semibold text-slate-200">
+                Password
+              </label>
+
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
+                />
+
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create password"
+                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-12 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
+                  name="password"
+                  value={forms.password}
+                  onChange={handleChange}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-cyan-400"
+                >
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Gender */}
+            <div className="mb-5">
+              <label className="mb-2 block text-sm font-semibold text-slate-200">
+                Gender
+              </label>
+
+              <div className="grid grid-cols-3 gap-3">
+                {["Male", "Female", "Other"].map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() =>
+                      setForms((prev) => ({
+                        ...prev,
+                        gender: item,
+                      }))
+                    }
+                    className={`h-12 rounded-xl border backdrop-blur-xl transition-all duration-300 ${
+                      forms.gender === item
+                        ? "border-cyan-400 bg-cyan-500/20 text-cyan-300 shadow-lg shadow-cyan-500/20"
+                        : "border-white/10 bg-white/5 text-slate-300 hover:border-cyan-400 hover:bg-cyan-500/10"
+                    }`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Current Location */}
+            <div className="mb-4">
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-cyan-400"
+                onClick={getCurrentLocation}
+                className="flex cursor-pointer items-center gap-2 text-sm font-medium text-cyan-400 transition hover:text-cyan-300"
               >
-                {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                <MapPin size={16} />
+                Use Current Location
               </button>
             </div>
-          </div>
 
-          {/* Current Location */}
-          <div className="mb-4">
+            {/* Address */}
+            <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+              {/* State */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-200">
+                  State
+                </label>
+
+                <div className="relative">
+                  <MapPin
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
+                  />
+
+                  <input
+                    type="text"
+                    name="state"
+                    value={forms.location.state}
+                    onChange={handleLocationChange}
+                    placeholder="Enter your state"
+                    className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
+                  />
+                </div>
+              </div>
+
+              {/* District */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-200">
+                  District
+                </label>
+
+                <div className="relative">
+                  <MapPin
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
+                  />
+
+                  <input
+                    type="text"
+                    name="district"
+                    value={forms.location.district}
+                    onChange={handleLocationChange}
+                    placeholder="Enter your district"
+                    className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
+                  />
+                </div>
+              </div>
+
+              {/* City */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-200">
+                  City
+                </label>
+
+                <div className="relative">
+                  <MapPin
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
+                  />
+
+                  <input
+                    type="text"
+                    name="city"
+                    value={forms.location.city}
+                    onChange={handleLocationChange}
+                    placeholder="Enter your city"
+                    className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
+                  />
+                </div>
+              </div>
+
+              {/* Pincode */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-200">
+                  Pincode
+                </label>
+
+                <div className="relative">
+                  <MapPin
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
+                  />
+
+                  <input
+                    type="text"
+                    name="pincode"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={forms.location.pincode}
+                    onChange={handleLocationChange}
+                    placeholder="Enter pincode"
+                    className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Button */}
             <button
-              type="button"
-              onClick={getCurrentLocation}
-              className="flex cursor-pointer items-center gap-2 text-sm font-medium text-cyan-400 transition hover:text-cyan-300"
+              type="submit"
+              disabled={loading}
+              className="h-12 w-full rounded-xl bg-linear-to-r from-cyan-500 via-blue-600 to-violet-600 font-semibold text-white transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <MapPin size={16} />
-              Use Current Location
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
-          </div>
 
-          {/* Address */}
-          <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* State */}
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-200">
-                State
-              </label>
-
-              <div className="relative">
-                <MapPin
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
-                />
-
-                <input
-                  type="text"
-                  value={location.state}
-                  onChange={(e) =>
-                    setLocation({ ...location, state: e.target.value })
-                  }
-                  placeholder="Enter your state"
-                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
-                />
-              </div>
-            </div>
-
-            {/* District */}
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-200">
-                District
-              </label>
-
-              <div className="relative">
-                <MapPin
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
-                />
-
-                <input
-                  type="text"
-                  value={location.district}
-                  onChange={(e) =>
-                    setLocation({ ...location, district: e.target.value })
-                  }
-                  placeholder="Enter your district"
-                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
-                />
-              </div>
-            </div>
-
-            {/* City */}
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-200">
-                City
-              </label>
-
-              <div className="relative">
-                <MapPin
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
-                />
-
-                <input
-                  type="text"
-                  value={location.city}
-                  onChange={(e) =>
-                    setLocation({ ...location, city: e.target.value })
-                  }
-                  placeholder="Enter your city"
-                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
-                />
-              </div>
-            </div>
-
-            {/* Pincode */}
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-200">
-                Pincode
-              </label>
-
-              <div className="relative">
-                <MapPin
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"
-                />
-
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={location.pincode}
-                  onChange={(e) =>
-                    setLocation({ ...location, pincode: e.target.value })
-                  }
-                  placeholder="Enter pincode"
-                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-12 pr-4 text-white placeholder:text-slate-500 outline-none backdrop-blur-xl transition-all duration-300 focus:border-cyan-400 focus:bg-white/10"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Button */}
-          <button className="h-12 w-full rounded-xl bg-linear-to-r from-cyan-500 via-blue-600 to-violet-600 font-semibold text-white shadow-lg shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-cyan-500/40">
-            Create Account
-          </button>
-
-          <Link href="/login">
-            <p className="mt-5 text-center text-sm text-slate-400">
-              Already have an account?{" "}
-              <span className="font-semibold text-cyan-400 hover:text-cyan-300">
-                Login
-              </span>
-            </p>
-          </Link>
+            <Link href="/login">
+              <p className="mt-5 text-center text-sm text-slate-400">
+                Already have an account?{" "}
+                <span className="font-semibold text-cyan-400 hover:text-cyan-300">
+                  Login
+                </span>
+              </p>
+            </Link>
+          </form>
         </div>
       </div>
     </div>
