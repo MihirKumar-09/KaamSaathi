@@ -8,7 +8,8 @@ import { connectDB } from "@/lib/db";
 export async function POST(req) {
   try {
     await connectDB();
-    const { name, email, phone, password, gender, location } = await req.json();
+    const { name, email, phone, password, gender, location, role } =
+      await req.json();
 
     // check existing user;
     const existingUser = await User.findOne({ email });
@@ -32,6 +33,7 @@ export async function POST(req) {
       phone,
       password: hashPassword,
       gender,
+      role,
       location,
     });
 

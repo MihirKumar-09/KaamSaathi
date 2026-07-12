@@ -24,15 +24,18 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 export default function Register() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const role = searchParams.get("role");
   const [forms, setForms] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
     gender: "",
+    role: role || "worker",
     location: {
       state: "",
       district: "",
@@ -151,12 +154,17 @@ export default function Register() {
         body: JSON.stringify(forms),
       });
       const data = await res.json();
+      console.log(data);
       if (!res.ok) {
         alert(data.message);
         return;
       }
       alert(data.message);
-      router.push("/");
+      if (forms.role === "worker") {
+        router.push("/worker/dashboard");
+      } else {
+        router.push("/employer/dashboard");
+      }
     } catch (err) {
       console.log(err);
       alert("Something went wrong");

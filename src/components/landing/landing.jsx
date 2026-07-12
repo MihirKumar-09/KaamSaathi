@@ -33,7 +33,7 @@ export default function LandingPage() {
         <div className="mt-8 grid items-stretch gap-5 md:mt-12 md:grid-cols-2 md:gap-6">
           {/* Worker */}
           <Link
-            href="/worker/dashboard"
+            href="/register?role=worker"
             className="
               group
               flex h-full flex-col rounded-3xl
@@ -74,7 +74,7 @@ export default function LandingPage() {
 
           {/* Employer */}
           <Link
-            href="/employer/dashboard"
+            href="/register?role=employer"
             className="
               group
               flex h-full flex-col rounded-3xl

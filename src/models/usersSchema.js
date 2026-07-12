@@ -17,8 +17,6 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 6,
-      maxlength: 32,
     },
     role: {
       type: String,
@@ -34,7 +32,7 @@ const userSchema = new mongoose.Schema(
     gender: {
       type: String,
       required: true,
-      enum: ["Male", "Female"],
+      enum: ["Male", "Female", "Other"],
     },
     location: {
       state: {
