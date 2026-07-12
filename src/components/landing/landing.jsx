@@ -1,10 +1,25 @@
-"use client";
-
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import { redirect } from "next/navigation";
 import { ArrowRight, BriefcaseBusiness, Building2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (token) {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.role === "worker") {
+      redirect("/worker/dashboard");
+    }
+
+    if (decoded.role === "employer") {
+      redirect("/employer/dashboard");
+    }
+  }
   return (
     <main className="relative flex min-h-screen items-center justify-center bg-[#FFF9F3] px-4 py-6 md:px-6 md:py-0">
       <div className="relative z-10 w-full max-w-6xl">

@@ -1,52 +1,44 @@
 import User from "@/models/usersSchema";
-import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
+import { connectDB } from "@/lib/db";
+import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-import { connectDB } from "@/lib/db";
 
 export async function POST(req) {
   try {
     await connectDB();
-    const { name, email, phone, password, gender, location, role } =
-      await req.json();
+    const { email, password } = await req.json();
 
-    // check existing user;
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    // check is user exist;
+    const user = await User.findOne({ email });
+    if (!user) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "User already exists",
-        },
+        { success: false, message: "Check the credentials" },
         { status: 409 },
       );
     }
 
-    // Hash password;
-    const hashPassword = await bcrypt.hash(password, 10);
+    // Compare password;
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return NextResponse.json(
+        { success: false, message: "Invalid Password" },
+        { status: 409 },
+      );
+    }
 
-    // Crate new user;
-    const user = await User.create({
-      name,
-      email,
-      phone,
-      password: hashPassword,
-      gender,
-      role,
-      location,
-    });
-
-    // Generate JWT
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      {
+        userId: user._id,
+        role: user.role,
+      },
       process.env.JWT_SECRET,
       {
         expiresIn: "1d",
       },
     );
 
-    // Set Cookie
     const cookieStore = await cookies();
 
     cookieStore.set("token", token, {
@@ -60,9 +52,10 @@ export async function POST(req) {
     return NextResponse.json(
       {
         success: true,
-        message: "Signup Successfully",
+        message: "Login Successfully",
+        role: user.role,
       },
-      { status: 201 },
+      { status: 200 },
     );
   } catch (err) {
     return NextResponse.json(
@@ -70,7 +63,9 @@ export async function POST(req) {
         success: false,
         message: err.message,
       },
-      { status: 500 },
+      {
+        status: 500,
+      },
     );
   }
 }
