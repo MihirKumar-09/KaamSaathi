@@ -21,19 +21,24 @@ export default function NavbarLayout() {
   const role = "worker";
   const navLinks = role === "worker" ? workerLinks : employerLinks;
   return (
-    <div className="flex items-center justify-between w-full pl-4 pr-4">
+    <div className="flex items-center justify-between w-full h-20 px-6 lg:px-12 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-md sticky top-0 z-50">
+      <Link href={`/${role}/dashboard`}>
+        <div>
+          <Image
+            src="/logo/logo.png"
+            alt="KaamSaathi Logo"
+            height={80}
+            width={80}
+          />
+        </div>
+      </Link>
       <div>
-        <Image
-          src="/logo/logo.png"
-          alt="KaamSaathi Logo"
-          height={80}
-          width={80}
-        />
-      </div>
-      <div>
-        <ul className="flex gap-12">
+        <ul className="flex gap-12 font-medium ">
           {navLinks.map((link) => (
-            <li key={link.id}>
+            <li
+              key={link.id}
+              className="hover:text-green-600 transition-all duration-300"
+            >
               <Link href={link.href}>{link.name}</Link>
             </li>
           ))}
