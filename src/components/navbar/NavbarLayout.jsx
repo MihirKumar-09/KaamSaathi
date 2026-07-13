@@ -108,7 +108,7 @@ export default function NavbarLayout() {
           </div>
         </Link>
         <div>
-          <ul className="hidden lg:flex gap-12 font-medium">
+          <ul className="hidden gap-12 font-medium lg:flex">
             {navLinks.map((link) => (
               <li key={link.id}>
                 <Link
@@ -195,7 +195,7 @@ export default function NavbarLayout() {
                 </Link>
 
                 {index !== navLinks.length - 1 && (
-                  <div className="mx-6 h-px bg-linear-to-r from-transparent via-blue-200 to-transparent" />
+                  <div className="h-px mx-6 from-transparent via-blue-200 to-transparent bg-linear-to-r" />
                 )}
               </li>
             ))}
