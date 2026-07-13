@@ -2,32 +2,92 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Menu,
-  X,
   Home,
-  BriefcaseBusiness,
-  FileText,
-  Heart,
+  Menu,
+  NotepadTextIcon,
+  Save,
   Phone,
-  LogOut,
-  UserCircle2,
+  Search,
+  X,
+  CloudUpload,
+  BookOpen,
 } from "lucide-react";
 import { useState } from "react";
 
 const workerLinks = [
-  { id: 1, name: "Home", href: "/worker/dashboard" },
-  { id: 2, name: "Find Jobs", href: "/jobs" },
-  { id: 3, name: "Applications", href: "/applications" },
-  { id: 4, name: "Saved Jobs", href: "/saved-jobs" },
-  { id: 5, name: "Contact Us", href: "/contact" },
+  {
+    id: 1,
+    name: "Home",
+    href: "/worker/dashboard",
+    icon: <Home />,
+    color: "text-blue-600",
+  },
+  {
+    id: 2,
+    name: "Find Jobs",
+    href: "/jobs",
+    icon: <Search />,
+    color: "text-emerald-600",
+  },
+  {
+    id: 3,
+    name: "Applications",
+    href: "/applications",
+    icon: <NotepadTextIcon />,
+    color: "text-violet-600",
+  },
+  {
+    id: 4,
+    name: "Saved Jobs",
+    href: "/saved-jobs",
+    icon: <Save />,
+    color: "text-rose-500",
+  },
+  {
+    id: 5,
+    name: "Contact Us",
+    href: "/contact",
+    icon: <Phone />,
+    color: "text-amber-500",
+  },
 ];
 
 const employerLinks = [
-  { id: 1, name: "Home", href: "/employer/dashboard" },
-  { id: 2, name: "Post Job", href: "/post-job" },
-  { id: 3, name: "My Jobs", href: "/my-jobs" },
-  { id: 4, name: "Applications", href: "/applications" },
-  { id: 5, name: "Contact Us", href: "/contact" },
+  {
+    id: 1,
+    name: "Home",
+    href: "/employer/dashboard",
+    icon: <Home />,
+    color: "text-blue-600",
+  },
+  {
+    id: 2,
+    name: "Post Job",
+    href: "/post-job",
+    icon: <CloudUpload />,
+    color: "text-emerald-600",
+  },
+  {
+    id: 3,
+    name: "My Jobs",
+    href: "/my-jobs",
+    icon: <BookOpen />,
+    color: "text-violet-600",
+  },
+  {
+    id: 4,
+    name: "Applications",
+    href: "/applications",
+    icon: <NotepadTextIcon />,
+    color: "text-orange-500",
+  },
+  {
+    id: 5,
+    name: "Contact Us",
+    href: "/contact",
+    icon: <Phone />,
+    color: "text-cyan-600",
+  },
 ];
 export default function NavbarLayout() {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,7 +96,7 @@ export default function NavbarLayout() {
   const navLinks = role === "worker" ? workerLinks : employerLinks;
   return (
     <>
-      <div className="flex items-center justify-between w-full h-20 px-6 lg:px-12 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-md sticky top-0 z-50">
+      <div className="flex items-center justify-between w-full h-20 px-6 lg:px-12 bg-linear-to-r from-[#F8FAFC] via-[#E2E8F0] to-[#CBD5E1] border-b border-slate-300 shadow-[0_10px_35px_rgba(71,85,105,0.15)] sticky top-0 z-50">
         <Link href={`/${role}/dashboard`}>
           <div>
             <Image
@@ -48,120 +108,99 @@ export default function NavbarLayout() {
           </div>
         </Link>
         <div>
-          <ul className="hidden lg:flex gap-12 font-medium ">
+          <ul className="hidden lg:flex gap-12 font-medium">
             {navLinks.map((link) => (
-              <li
-                key={link.id}
-                className="hover:text-green-600 transition-all duration-300"
-              >
-                <Link href={link.href}>{link.name}</Link>
+              <li key={link.id}>
+                <Link
+                  href={link.href}
+                  className="
+          relative
+          inline-block
+          py-2
+          font-medium
+          text-gray-800
+          transition-all
+          duration-300
+          hover:text-blue-500
+          after:content-['']
+          after:absolute
+          after:left-0
+          after:-bottom-1
+          after:h-0.5
+          after:w-0
+          after:bg-blue-500
+          after:rounded-full
+          after:transition-all
+          after:duration-300
+          hover:after:w-full
+        "
+                >
+                  {link.name}
+                </Link>
               </li>
             ))}
           </ul>
         </div>
         <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden">
-          <Menu size={28} />
+          {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
       {isOpen && (
-        <>
-          {/* Overlay */}
-          <div
-            onClick={() => setIsOpen(false)}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
-          />
+        <div
+          className={`
+  lg:hidden
+  overflow-hidden
+  bg-linear-to-br
+  from-[#F8FAFC]
+  via-[#EAF3FF]
+  to-[#DCEEFF]
+  backdrop-blur-xl
+  border-b
+  border-blue-100
+  shadow-[0_12px_35px_rgba(59,130,246,0.12)]
+  transition-all
+  duration-300
+  ease-out
+  origin-top
+  ${
+    isOpen
+      ? "opacity-100 translate-y-0 scale-y-100"
+      : "opacity-0 -translate-y-5 scale-y-95 pointer-events-none"
+  }
+`}
+        >
+          <div className="flex items-center justify-end px-6 py-4 border-b border-blue-100"></div>
+          <ul>
+            {navLinks.map((link, index) => (
+              <li key={link.id}>
+                <Link
+                  href={link.href}
+                  onClick={() => setIsOpen(false)}
+                  className={`relative
+  flex
+  items-center
+  gap-3
+  px-6
+  py-4
+  font-bold
+  text-slate-700
+  transition-all
+  duration-300
+  hover:bg-white/70
+  hover:text-blue-600
+  hover:pl-8`}
+                >
+                  <span className={link.color}>{link.icon}</span>
+                  <span>{link.name}</span>
+                </Link>
 
-          {/* Drawer */}
-          <div className="fixed top-0 right-0 h-screen w-80 bg-white/95 backdrop-blur-xl shadow-2xl z-50 flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-5 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <Image src="/logo/logo.png" alt="Logo" width={48} height={48} />
-
-                <div>
-                  <h2 className="font-bold text-lg text-gray-900">
-                    KaamSaathi
-                  </h2>
-                  <p className="text-xs text-gray-500">Find Local Jobs</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setIsOpen(false)}
-                className="h-10 w-10 rounded-full hover:bg-gray-100 transition flex items-center justify-center"
-              >
-                <X size={22} />
-              </button>
-            </div>
-
-            {/* Navigation */}
-            <ul className="flex-1 px-4 py-6 space-y-2">
-              {navLinks.map((link) => {
-                let Icon;
-
-                switch (link.name) {
-                  case "Home":
-                    Icon = Home;
-                    break;
-
-                  case "Find Jobs":
-                  case "Post Job":
-                    Icon = BriefcaseBusiness;
-                    break;
-
-                  case "Applications":
-                    Icon = FileText;
-                    break;
-
-                  case "Saved Jobs":
-                  case "My Jobs":
-                    Icon = Heart;
-                    break;
-
-                  case "Contact Us":
-                    Icon = Phone;
-                    break;
-
-                  default:
-                    Icon = Home;
-                }
-
-                return (
-                  <li key={link.id}>
-                    <Link
-                      href={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-4 rounded-2xl px-4 py-3 text-gray-700 font-medium hover:bg-green-50 hover:text-green-700 transition-all duration-300"
-                    >
-                      <Icon size={20} />
-                      {link.name}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-
-            {/* Bottom Profile */}
-            <div className="border-t border-gray-200 p-5">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                  <UserCircle2 size={28} className="text-green-700" />
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900">Mihir Kumar</h3>
-
-                  <p className="text-sm text-gray-500 capitalize">{role}</p>
-                </div>
-              </div>
-
-              <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-red-50 text-red-600 py-3 font-semibold hover:bg-red-100 transition">
-                <LogOut size={18} />
-                Logout
-              </button>
-            </div>
-          </div>
-        </>
+                {index !== navLinks.length - 1 && (
+                  <div className="mx-6 h-px bg-linear-to-r from-transparent via-blue-200 to-transparent" />
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </>
   );
