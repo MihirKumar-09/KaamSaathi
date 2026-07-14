@@ -1,68 +1,140 @@
 import Image from "next/image";
-import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaLinkedin, FaHeart } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+
 export default function FooterLayout() {
   return (
-    <div className="bg-linear-to-r from-[#F8FAFC] via-[#E2E8F0] to-[#CBD5E1] lg:h-72 px-6 lg:px-14">
-      <div className="pt-4 lg:pt-6 flex justify-between">
-        <div>
-          <span>
+    <footer className="bg-linear-to-r from-[#F8FAFC] via-[#E2E8F0] to-[#CBD5E1]">
+      <div className="mx-auto max-w-7xl px-6 py-14 lg:px-14">
+        {/* Top Section */}
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
+          {/* Logo & Description */}
+          <div>
             <Image
               src="/logo/logo.png"
               alt="KaamSaathi Logo"
-              height={60}
-              width={60}
+              width={65}
+              height={65}
             />
-          </span>
-          <p className="text-sm lg:text-md text-orange-900">
-            Find trusted employers and skilled workers for every opportunity.{" "}
-            <br className="hidden lg:flex" />
-            KaamSaathi makes hiring and job searching simple, secure, and
-            reliable.
-          </p>
-          <div className="flex items-center gap-4 text-xl mt-4 lg:mt-6">
-            <span className="cursor-pointer transition-transform duration-300 hover:scale-110">
-              <FaFacebook className="text-[#1877F2]" />
-            </span>
 
-            <span className="cursor-pointer transition-transform duration-300 hover:scale-110">
-              <FaTwitter className="text-[#1DA1F2]" />
-            </span>
+            <p className="mt-4 max-w-sm text-sm leading-7 text-slate-600">
+              Find trusted employers and skilled workers for every opportunity.
+              KaamSaathi makes hiring and job searching simple, secure and
+              reliable.
+            </p>
 
-            <span className="cursor-pointer transition-transform duration-300 hover:scale-110">
-              <FaInstagram className="text-[#E4405F]" />
-            </span>
+            {/* Social Icons */}
+            <div className="mt-6 flex gap-4">
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <FaFacebook className="text-lg text-[#1877F2]" />
+              </button>
+
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <FaInstagram className="text-lg text-[#E4405F]" />
+              </button>
+
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <FaXTwitter className="text-lg text-slate-900" />
+              </button>
+
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <FaLinkedin className="text-lg text-[#0A66C2]" />
+              </button>
+            </div>
+          </div>
+
+          {/* Company */}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900">Company</h3>
+            <div className="mt-2 mb-5 h-0.5 w-14 rounded-full bg-orange-500"></div>
+
+            <ul className="space-y-3 text-slate-600">
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                About Us
+              </li>
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Our Mission
+              </li>
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Careers
+              </li>
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Contact Us
+              </li>
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Blog
+              </li>
+            </ul>
+          </div>
+
+          {/* Support */}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900">Support</h3>
+            <div className="mt-2 mb-5 h-0.5 w-14 rounded-full bg-orange-500"></div>
+
+            <ul className="space-y-3 text-slate-600">
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Help Center
+              </li>
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                FAQs
+              </li>
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Report a Problem
+              </li>
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Safety Tips
+              </li>
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Feedback
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900">Legal</h3>
+            <div className="mt-2 mb-5 h-0.5 w-14 rounded-full bg-orange-500"></div>
+
+            <ul className="space-y-3 text-slate-600">
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Privacy Policy
+              </li>
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Terms & Conditions
+              </li>
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Cookies Policy
+              </li>
+              <li className="cursor-pointer transition-all duration-300 hover:translate-x-2 hover:text-orange-500">
+                Community Guidelines
+              </li>
+            </ul>
           </div>
         </div>
-        <div>
-          <h5>Company</h5>
-          <ul>
-            <li>About Us</li>
-            <li>Our Mission</li>
-            <li>Careers</li>
-            <li>Contact Us</li>
-            <li>Blog</li>
-          </ul>
-        </div>
-        <div>
-          <h5>Support</h5>
-          <ul>
-            <li>Help Center</li>
-            <li>FAQs</li>
-            <li>Report a Problem</li>
-            <li>Safety Tips</li>
-            <li>Feedback</li>
-          </ul>
-        </div>
-        <div>
-          <h5>Legal</h5>
-          <ul>
-            <li>Privacy Policy</li>
-            <li>Terms & Conditions</li>
-            <li>Cookies Policy</li>
-            <li>Community Guidelines</li>
-          </ul>
+
+        {/* Divider */}
+        <div className="my-10 h-px bg-slate-300"></div>
+
+        {/* Bottom */}
+        <div className="flex flex-col items-center justify-between gap-4 text-sm text-slate-600 md:flex-row">
+          <p>© 2026 KaamSaathi. All Rights Reserved.</p>
+
+          <div className="flex gap-6">
+            <span className="cursor-pointer hover:text-orange-500">
+              Privacy
+            </span>
+            <span className="cursor-pointer hover:text-orange-500">Terms</span>
+            <span className="cursor-pointer hover:text-orange-500">
+              Cookies
+            </span>
+          </div>
+
+          <p className="flex items-center gap-2">
+            Made with <FaHeart className="text-red-500" /> in India
+          </p>
         </div>
       </div>
-    </div>
+    </footer>
   );
 }
