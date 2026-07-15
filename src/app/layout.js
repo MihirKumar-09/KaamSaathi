@@ -1,5 +1,5 @@
 import "./globals.css";
-
+import AuthProvider from "@/provider/AuthProvider";
 export const metadata = {
   title: "KaamSaathi",
   description: "FInd jobs easily",
@@ -11,7 +11,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
