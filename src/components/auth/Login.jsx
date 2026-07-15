@@ -4,8 +4,11 @@ import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 export default function Login() {
+  const { login } = useContext(AuthContext);
   const router = useRouter();
   const [form, setForm] = useState({
     email: "",
@@ -27,24 +30,21 @@ export default function Login() {
 
     try {
       setLoading(true);
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
 
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.message);
-        return;
-      }
+      const data = await login(form);
 
-      if (data.role === "worker") {
-        router.push("/worker/dashboard");
-      } else {
-        router.push("/employer/dashboard");
+      switch (data.role) {
+        case "worker":
+          router.push("/worker/dashboard");
+          break;
+        case "employer":
+          router.push("/employer/dashboard");
+          break;
+        case "admin":
+          router.push("/admin/dashboard");
+          break;
+        default:
+          alert("Invalid user role");
       }
     } catch (err) {
       console.log(err);

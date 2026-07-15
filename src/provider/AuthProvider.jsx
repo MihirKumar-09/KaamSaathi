@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { AuthContext } from "@/context/AuthContext";
-export default function AuthProvider({ children }) {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   const login = async (formData) => {
@@ -22,10 +22,7 @@ export default function AuthProvider({ children }) {
       }
       setUser(data.user);
 
-      return {
-        success: true,
-        message: data.message,
-      };
+      return data;
     } catch (err) {
       return {
         success: false,
@@ -50,10 +47,7 @@ export default function AuthProvider({ children }) {
       }
       setUser(data.user);
 
-      return {
-        success: true,
-        message: data.message,
-      };
+      return data;
     } catch (err) {
       return {
         success: false,

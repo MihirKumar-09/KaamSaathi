@@ -1,5 +1,5 @@
 import "./globals.css";
-import AuthProvider from "@/provider/AuthProvider";
+import { AuthProvider } from "@/provider/AuthProvider";
 export const metadata = {
   title: "KaamSaathi",
   description: "FInd jobs easily",
