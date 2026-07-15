@@ -526,7 +526,7 @@ p-8"
             <button
               type="submit"
               disabled={loading}
-              className="h-12 w-full rounded-xl bg-linear-to-r from-cyan-500 via-blue-600 to-violet-600 font-semibold text-white transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-12 w-full rounded-xl bg-linear-to-r from-cyan-500 via-blue-600 to-violet-600 font-semibold text-white transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             >
               {loading ? "Creating Account..." : "Create Account"}
             </button>

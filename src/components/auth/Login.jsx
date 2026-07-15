@@ -41,8 +41,6 @@ export default function Login() {
         return;
       }
 
-      alert(data.message);
-
       if (data.role === "worker") {
         router.push("/worker/dashboard");
       } else {
@@ -130,7 +128,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-linear-to-r from-fuchsia-500 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-fuchsia-500/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-fuchsia-500/40 active:scale-[0.98]"
+              className="w-full rounded-xl bg-linear-to-r from-fuchsia-500 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-fuchsia-500/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-fuchsia-500/40 active:scale-[0.98] cursor-pointer"
             >
               {loading ? "Logging in..." : "Login"}
             </button>
