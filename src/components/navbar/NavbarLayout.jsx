@@ -11,6 +11,10 @@ import {
   X,
   CloudUpload,
   BookOpen,
+  CircleUserRound,
+  ChevronDown,
+  User,
+  Power,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -91,6 +95,7 @@ const employerLinks = [
 ];
 export default function NavbarLayout() {
   const [isOpen, setIsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   // Temporary for testing;
   const role = "worker";
   const navLinks = role === "worker" ? workerLinks : employerLinks;
@@ -107,7 +112,7 @@ export default function NavbarLayout() {
             />
           </div>
         </Link>
-        <div>
+        <div className="flex gap-12">
           <ul className="hidden gap-12 font-medium lg:flex">
             {navLinks.map((link) => (
               <li key={link.id}>
@@ -140,6 +145,33 @@ export default function NavbarLayout() {
               </li>
             ))}
           </ul>
+          <div className="hidden lg:block h-full">
+            <button
+              onClick={() => setProfileOpen(!profileOpen)}
+              className="cursor-pointer"
+            >
+              <CircleUserRound color="#3874FF" size={24} />
+            </button>
+            {/* Drop Down */}
+            {profileOpen && (
+              <div className="absolute top-14 right-10 bg-white border-[#E2E8F0] px-2 py-4 rounded-md">
+                <ul className="flex flex-col gap-2">
+                  <li className="cursor-pointer flex items-center gap-2 text-blue-500">
+                    <span>
+                      <User />
+                    </span>
+                    Profile
+                  </li>
+                  <li className="cursor-pointer flex items-center gap-2 text-red-400">
+                    <span>
+                      <Power />
+                    </span>
+                    Logout
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
         <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden">
           {isOpen ? <X size={28} /> : <Menu size={28} />}
@@ -200,6 +232,26 @@ export default function NavbarLayout() {
               </li>
             ))}
           </ul>
+          <li>
+            <Link
+              href="/profile"
+              onClick={() => setIsOpen(false)}
+              className="
+      flex
+      items-center
+      gap-3
+      px-6
+      py-4
+      font-bold
+      text-slate-700
+      hover:bg-white/70
+      hover:text-blue-600
+    "
+            >
+              <CircleUserRound className="text-blue-600" />
+              <span>My Profile</span>
+            </Link>
+          </li>
         </div>
       )}
     </>
