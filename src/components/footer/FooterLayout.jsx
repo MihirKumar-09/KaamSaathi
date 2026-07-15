@@ -25,19 +25,19 @@ export default function FooterLayout() {
 
             {/* Social Icons */}
             <div className="mt-6 flex gap-4">
-              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer">
                 <FaFacebook className="text-lg text-[#1877F2]" />
               </button>
 
-              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer">
                 <FaInstagram className="text-lg text-[#E4405F]" />
               </button>
 
-              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer">
                 <FaXTwitter className="text-lg text-slate-900" />
               </button>
 
-              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer">
                 <FaLinkedin className="text-lg text-[#0A66C2]" />
               </button>
             </div>
