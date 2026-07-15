@@ -159,7 +159,6 @@ export default function Register() {
         alert(data.message);
         return;
       }
-      alert(data.message);
       if (forms.role === "worker") {
         router.push("/worker/dashboard");
       } else {
