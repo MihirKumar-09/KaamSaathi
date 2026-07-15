@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Home,
   Menu,
@@ -94,11 +95,28 @@ const employerLinks = [
   },
 ];
 export default function NavbarLayout() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   // Temporary for testing;
   const role = "worker";
   const navLinks = role === "worker" ? workerLinks : employerLinks;
+
+  const handleLogout = async () => {
+    const res = await fetch("/api/auth/logout", {
+      method: "POSt",
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.message);
+      return;
+    }
+    alert(data.message);
+    if (data.success) {
+      router.push("/");
+      router.refresh();
+    }
+  };
   return (
     <>
       <div className="flex items-center justify-between w-full h-20 px-6 lg:px-12 bg-linear-to-r from-[#F8FAFC] via-[#E2E8F0] to-[#CBD5E1] border-b border-slate-300 shadow-[0_10px_35px_rgba(71,85,105,0.15)] sticky top-0 z-50">
@@ -162,7 +180,10 @@ export default function NavbarLayout() {
                     </span>
                     Profile
                   </li>
-                  <li className="cursor-pointer flex items-center gap-2 text-red-400">
+                  <li
+                    onClick={handleLogout}
+                    className="cursor-pointer flex items-center gap-2 text-red-400"
+                  >
                     <span>
                       <Power />
                     </span>

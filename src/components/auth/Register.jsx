@@ -181,6 +181,7 @@ export default function Register() {
           src="/auth/hero.jpeg"
           alt="Hero"
           fill
+          sizes="auto"
           priority
           className="scale-110 object-cover blur-md"
         />
