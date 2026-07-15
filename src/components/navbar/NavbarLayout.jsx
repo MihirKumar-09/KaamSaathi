@@ -13,9 +13,10 @@ import {
   CloudUpload,
   BookOpen,
   CircleUserRound,
-  ChevronDown,
   User,
   Power,
+  Settings,
+  ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -163,33 +164,48 @@ export default function NavbarLayout() {
               </li>
             ))}
           </ul>
-          <div className="hidden lg:block h-full">
+          {/* Drop Down */}
+          <div className="relative hidden lg:block">
+            {/* Profile Button */}
             <button
               onClick={() => setProfileOpen(!profileOpen)}
-              className="cursor-pointer"
+              className="cursor-pointer transition-transform duration-300 hover:scale-105"
             >
-              <CircleUserRound color="#3874FF" size={24} />
+              <div className="h-11 w-11 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg shadow-lg ring-2 ring-white hover:ring-blue-300">
+                M
+              </div>
             </button>
-            {/* Drop Down */}
+
+            {/* Dropdown */}
             {profileOpen && (
-              <div className="absolute top-14 right-10 bg-white border-[#E2E8F0] px-2 py-4 rounded-md">
-                <ul className="flex flex-col gap-2">
-                  <li className="cursor-pointer flex items-center gap-2 text-blue-500">
-                    <span>
-                      <User />
-                    </span>
-                    Profile
-                  </li>
-                  <li
+              <div className="absolute right-0 top-14 w-72 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.18)] animate-in fade-in zoom-in-95 duration-200 z-50">
+                {/* Menu */}
+                <div className="p-2">
+                  <button className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 cursor-pointer">
+                    <User size={20} />
+                    <span className="font-medium">Profile</span>
+                  </button>
+
+                  <button className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 cursor-pointer">
+                    <Settings size={20} />
+                    <span className="font-medium">Settings</span>
+                  </button>
+
+                  <button className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-gray-700 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 cursor-pointer">
+                    <ShieldCheck size={20} />
+                    <span className="font-medium">Privacy</span>
+                  </button>
+
+                  <div className="my-2 border-t border-gray-200"></div>
+
+                  <button
                     onClick={handleLogout}
-                    className="cursor-pointer flex items-center gap-2 text-red-400"
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-red-500 transition-all duration-200 hover:bg-red-50 cursor-pointer"
                   >
-                    <span>
-                      <Power />
-                    </span>
-                    Logout
-                  </li>
-                </ul>
+                    <Power size={20} />
+                    <span className="font-medium">Logout</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
