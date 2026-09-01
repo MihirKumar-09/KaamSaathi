@@ -23,10 +23,13 @@ import {
   EyeOff,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AuthContext } from "@/context/AuthContext";
+
 export default function Register() {
   const router = useRouter();
+  const { registration } = useContext(AuthContext);
   const searchParams = useSearchParams();
   const role = searchParams.get("role");
   const [forms, setForms] = useState({
@@ -146,27 +149,24 @@ export default function Register() {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(forms),
-      });
-      const data = await res.json();
-      console.log(data);
-      if (!res.ok) {
-        alert(data.message);
+      const data = await registration(forms);
+
+      if (!data || !data.success) {
+        alert(data?.message || "Registration failed. Please try again.");
         return;
       }
-      if (forms.role === "worker") {
+
+      const userRole = data.role || forms.role;
+      if (userRole === "worker") {
         router.push("/worker/dashboard");
-      } else {
+      } else if (userRole === "employer") {
         router.push("/employer/dashboard");
+      } else {
+        router.push("/admin/dashboard");
       }
     } catch (err) {
-      console.log(err);
-      alert("Something went wrong");
+      console.error(err);
+      alert("Something went wrong during registration");
     } finally {
       setLoading(false);
     }

@@ -40,7 +40,7 @@ export default async function LandingPage() {
           </h1>
 
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:mt-4 sm:text-base md:text-lg">
-            India's trusted platform where workers find jobs and employers hire
+            India&apos;s trusted platform where workers find jobs and employers hire
             skilled people.
           </p>
         </div>

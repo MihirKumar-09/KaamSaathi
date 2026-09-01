@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, AlertCircle } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext } from "react";
@@ -14,11 +15,13 @@ export default function Login() {
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setError("");
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -27,13 +30,26 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    if (!form.email || !form.password) {
+      setError("Please enter both email and password.");
+      return;
+    }
 
     try {
       setLoading(true);
 
       const data = await login(form);
 
-      switch (data.role) {
+      if (!data || !data.success) {
+        setError(data?.message || "Invalid email or password");
+        return;
+      }
+
+      const role = data.role || data.user?.role;
+
+      switch (role) {
         case "worker":
           router.push("/worker/dashboard");
           break;
@@ -44,11 +60,11 @@ export default function Login() {
           router.push("/admin/dashboard");
           break;
         default:
-          alert("Invalid user role");
+          setError("Account role not recognized. Please contact support.");
       }
     } catch (err) {
-      console.log(err);
-      alert("Something went wrong");
+      console.error(err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -72,6 +88,14 @@ export default function Login() {
             onSubmit={handleSubmit}
             className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40 backdrop-blur-2xl sm:p-8"
           >
+            {/* Error Message */}
+            {error && (
+              <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-sm text-rose-400 animate-in fade-in duration-200">
+                <AlertCircle className="h-5 w-5 shrink-0 text-rose-400" />
+                <span>{error}</span>
+              </div>
+            )}
+
             {/* Email */}
             <div className="mb-5">
               <label className="mb-2 block text-sm font-medium text-slate-200">
@@ -135,7 +159,7 @@ export default function Login() {
 
             {/* Register Link */}
             <p className="mt-6 text-center text-sm text-slate-400">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
                 href="/register"
                 className="font-semibold text-fuchsia-400 transition hover:text-fuchsia-300"
@@ -149,10 +173,13 @@ export default function Login() {
 
       {/* RIGHT SIDE */}
       <div className="relative hidden h-screen overflow-hidden lg:block lg:w-[55%]">
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1600&auto=format&fit=crop"
           alt="Hero"
-          className="absolute inset-0 h-full w-full object-cover"
+          fill
+          priority
+          sizes="(min-width: 1024px) 55vw, 100vw"
+          className="object-cover"
         />
 
         {/* Overlay */}

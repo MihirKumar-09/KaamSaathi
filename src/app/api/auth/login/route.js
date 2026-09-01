@@ -10,12 +10,19 @@ export async function POST(req) {
     await connectDB();
     const { email, password } = await req.json();
 
+    if (!email || !password) {
+      return NextResponse.json(
+        { success: false, message: "Please provide both email and password" },
+        { status: 400 },
+      );
+    }
+
     // check is user exist;
     const user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json(
-        { success: false, message: "Check the credentials" },
-        { status: 409 },
+        { success: false, message: "Invalid credentials" },
+        { status: 401 },
       );
     }
 
@@ -23,8 +30,8 @@ export async function POST(req) {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return NextResponse.json(
-        { success: false, message: "Invalid Password" },
-        { status: 409 },
+        { success: false, message: "Invalid credentials" },
+        { status: 401 },
       );
     }
 
@@ -49,11 +56,22 @@ export async function POST(req) {
       path: "/",
     });
 
+    const userObj = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      gender: user.gender,
+      location: user.location,
+    };
+
     return NextResponse.json(
       {
         success: true,
         message: "Login Successfully",
         role: user.role,
+        user: userObj,
       },
       { status: 200 },
     );
