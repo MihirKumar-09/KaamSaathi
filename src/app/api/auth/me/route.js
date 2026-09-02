@@ -20,26 +20,32 @@ export async function GET() {
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { success: false, message: "Invalid or expired token", user: null },
         { status: 401 }
       );
+      response.cookies.delete("token");
+      return response;
     }
 
     if (!decoded || !decoded.userId) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { success: false, message: "Invalid token payload", user: null },
         { status: 401 }
       );
+      response.cookies.delete("token");
+      return response;
     }
 
     await connectDB();
     const user = await User.findById(decoded.userId).select("-password");
     if (!user) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { success: false, message: "User not found", user: null },
-        { status: 404 }
+        { status: 401 }
       );
+      response.cookies.delete("token");
+      return response;
     }
 
     return NextResponse.json(
@@ -59,8 +65,9 @@ export async function GET() {
     );
   } catch (err) {
     return NextResponse.json(
-      { success: false, message: err.message, user: null },
+      { success: false, message: err.message || "Internal server error", user: null },
       { status: 500 }
     );
   }
 }
+

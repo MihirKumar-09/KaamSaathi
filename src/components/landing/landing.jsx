@@ -10,16 +10,23 @@ export default async function LandingPage() {
   const token = cookieStore.get("token")?.value;
 
   if (token) {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (decoded.role === "worker") {
-      redirect("/worker/dashboard");
+    let redirectPath = null;
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (decoded.role === "worker") {
+        redirectPath = "/worker/dashboard";
+      } else if (decoded.role === "employer") {
+        redirectPath = "/employer/dashboard";
+      }
+    } catch {
+      // Invalid or expired token - allow user to view landing page
     }
 
-    if (decoded.role === "employer") {
-      redirect("/employer/dashboard");
+    if (redirectPath) {
+      redirect(redirectPath);
     }
   }
+
   return (
     <main className="relative flex min-h-screen items-center justify-center bg-[#FFF9F3] px-4 py-6 md:px-6 md:py-0">
       <div className="relative z-10 w-full max-w-6xl">

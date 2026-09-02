@@ -1,23 +1,23 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function POST() {
   try {
-    const cookieStore = await cookies();
-    cookieStore.delete("token");
-
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         message: "Logged out successfully",
       },
       { status: 200 },
     );
+
+    response.cookies.delete("token");
+
+    return response;
   } catch (err) {
     return NextResponse.json(
       {
         success: false,
-        message: err.message,
+        message: err.message || "Logout failed",
       },
       {
         status: 500,
@@ -25,3 +25,4 @@ export async function POST() {
     );
   }
 }
+

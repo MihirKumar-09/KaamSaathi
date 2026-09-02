@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import RegisterForm from "@/components/auth/Register";
 
+export const dynamic = "force-dynamic";
+
 export default function Register() {
   return (
     <Suspense

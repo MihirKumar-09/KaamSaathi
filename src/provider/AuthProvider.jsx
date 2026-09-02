@@ -37,38 +37,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      try {
-        const res = await fetch("/api/auth/me", {
-          method: "GET",
-          credentials: "include",
-        });
-        if (!isMounted) return;
-        if (res.ok) {
-          const data = await res.json();
-          if (isMounted) {
-            setUser(data.success && data.user ? data.user : null);
-          }
-        } else if (isMounted) {
-          setUser(null);
-        }
-      } catch (err) {
-        if (isMounted) {
-          console.error("Failed to load user:", err);
-          setUser(null);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    })();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    fetchUser();
+  }, [fetchUser]);
 
   const login = async (formData) => {
     try {
@@ -86,7 +56,7 @@ export function AuthProvider({ children }) {
       if (!res.ok || !data.success) {
         return {
           success: false,
-          message: data.message || "Invalid credentials",
+          message: data?.message || "Invalid credentials",
         };
       }
 
@@ -117,7 +87,7 @@ export function AuthProvider({ children }) {
       if (!res.ok || !data.success) {
         return {
           success: false,
-          message: data.message || "Registration failed",
+          message: data?.message || "Registration failed",
         };
       }
       if (data.user) {
@@ -145,6 +115,8 @@ export function AuthProvider({ children }) {
       return true;
     } catch (err) {
       console.error("Logout error:", err);
+      setUser(null);
+      router.push("/login");
       return false;
     }
   };
@@ -165,3 +137,4 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+

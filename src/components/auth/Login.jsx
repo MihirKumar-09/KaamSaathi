@@ -52,12 +52,15 @@ export default function Login() {
       switch (role) {
         case "worker":
           router.push("/worker/dashboard");
+          router.refresh();
           break;
         case "employer":
           router.push("/employer/dashboard");
+          router.refresh();
           break;
         case "admin":
           router.push("/admin/dashboard");
+          router.refresh();
           break;
         default:
           setError("Account role not recognized. Please contact support.");

@@ -3,12 +3,13 @@ import bcrypt from "bcrypt";
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
 
 export async function POST(req) {
   try {
     await connectDB();
-    const { email, password } = await req.json();
+    const body = await req.json();
+    const email = body?.email?.trim().toLowerCase();
+    const password = body?.password;
 
     if (!email || !password) {
       return NextResponse.json(
@@ -17,20 +18,20 @@ export async function POST(req) {
       );
     }
 
-    // check is user exist;
+    // check if user exists
     const user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json(
-        { success: false, message: "Invalid credentials" },
+        { success: false, message: "Invalid email or password" },
         { status: 401 },
       );
     }
 
-    // Compare password;
+    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return NextResponse.json(
-        { success: false, message: "Invalid credentials" },
+        { success: false, message: "Invalid email or password" },
         { status: 401 },
       );
     }
@@ -42,19 +43,9 @@ export async function POST(req) {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1d",
+        expiresIn: "7d",
       },
     );
-
-    const cookieStore = await cookies();
-
-    cookieStore.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24,
-      path: "/",
-    });
 
     const userObj = {
       _id: user._id,
@@ -66,7 +57,7 @@ export async function POST(req) {
       location: user.location,
     };
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         message: "Login Successfully",
@@ -75,11 +66,21 @@ export async function POST(req) {
       },
       { status: 200 },
     );
+
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    });
+
+    return response;
   } catch (err) {
     return NextResponse.json(
       {
         success: false,
-        message: err.message,
+        message: err.message || "Internal server error",
       },
       {
         status: 500,
@@ -87,3 +88,4 @@ export async function POST(req) {
     );
   }
 }
+
