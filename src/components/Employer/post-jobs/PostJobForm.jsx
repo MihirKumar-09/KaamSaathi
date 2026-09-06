@@ -17,6 +17,8 @@ import {
   Loader2,
 } from "lucide-react";
 
+import { useToast } from "@/context/ToastContext";
+
 const CATEGORIES = [
   "Driver", "Electrician", "Plumber", "Carpenter", "Painter",
   "Cook", "Housekeeping", "Security Guard", "Delivery", "Gardener",
@@ -24,29 +26,62 @@ const CATEGORIES = [
   "AC Technician", "Beautician", "Helper", "Other",
 ];
 
-export default function PostJobForm({ onJobCreated, onCancel }) {
+export default function PostJobForm({
+  initialData = null,
+  onJobCreated,
+  onJobUpdated,
+  onCancel,
+}) {
+  const { toast } = useToast();
+  const isEditing = Boolean(initialData && initialData._id);
+
   const [formData, setFormData] = useState({
-    title: "",
-    category: "Driver",
-    vacancy: 1,
+    title: initialData?.title || "",
+    category: initialData?.category || "Driver",
+    vacancy: initialData?.vacancy || 1,
     salary: {
-      amount: "",
-      type: "Monthly",
+      amount: initialData?.salary?.amount ?? "",
+      type: initialData?.salary?.type || "Monthly",
     },
     location: {
-      state: "",
-      city: "",
-      address: "",
-      pincode: "",
+      state: initialData?.location?.state || "",
+      city: initialData?.location?.city || "",
+      address: initialData?.location?.address || "",
+      pincode: initialData?.location?.pincode || "",
     },
-    description: "",
-    status: "Open",
+    description: initialData?.description || "",
+    status: initialData?.status || "Open",
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [locating, setLocating] = useState(false);
+
+  useEffect(() => {
+    if (initialData) {
+      const timer = setTimeout(() => {
+        setFormData({
+          title: initialData.title || "",
+          category: initialData.category || "Driver",
+          vacancy: initialData.vacancy || 1,
+          salary: {
+            amount: initialData.salary?.amount ?? "",
+            type: initialData.salary?.type || "Monthly",
+          },
+          location: {
+            state: initialData.location?.state || "",
+            city: initialData.location?.city || "",
+            address: initialData.location?.address || "",
+            pincode: initialData.location?.pincode || "",
+          },
+          description: initialData.description || "",
+          status: initialData.status || "Open",
+        });
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -168,35 +203,43 @@ export default function PostJobForm({ onJobCreated, onCancel }) {
     // Client-side validation
     if (!formData.title.trim()) {
       setError("Please provide a job title.");
+      toast.warning("Title Required", "Please provide a job title.");
       return;
     }
     if (formData.title.trim().length > 80) {
       setError("Job title cannot exceed 80 characters.");
+      toast.warning("Title Too Long", "Job title cannot exceed 80 characters.");
       return;
     }
     if (!formData.category) {
       setError("Please select a job category.");
+      toast.warning("Category Required", "Please select a trade category.");
       return;
     }
     if (!formData.salary.amount || Number(formData.salary.amount) <= 0) {
       setError("Please enter a valid salary amount.");
+      toast.warning("Salary Required", "Please specify a valid salary amount.");
       return;
     }
     if (!formData.location.state.trim() || !formData.location.city.trim()) {
       setError("Please enter the state and city for the job location.");
+      toast.warning("Location Incomplete", "Please specify state and city.");
       return;
     }
     const cleanPin = formData.location.pincode.toString().trim();
     if (!/^\d{6}$/.test(cleanPin)) {
       setError("Please enter a valid 6-digit pincode.");
+      toast.warning("Invalid Pincode", "Please enter a valid 6-digit postal pincode.");
       return;
     }
     if (!formData.description.trim()) {
       setError("Please provide a job description.");
+      toast.warning("Description Required", "Please add a brief description of the job duties.");
       return;
     }
     if (formData.description.trim().length > 2000) {
       setError("Description cannot exceed 2000 characters.");
+      toast.warning("Description Too Long", "Description cannot exceed 2000 characters.");
       return;
     }
 
@@ -221,8 +264,11 @@ export default function PostJobForm({ onJobCreated, onCancel }) {
         status: formData.status,
       };
 
-      const res = await fetch("/api/jobs", {
-        method: "POST",
+      const url = isEditing ? `/api/jobs/${initialData._id}` : "/api/jobs";
+      const method = isEditing ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
         credentials: "include",
@@ -231,17 +277,24 @@ export default function PostJobForm({ onJobCreated, onCancel }) {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setError(data?.message || "Failed to post job. Please try again.");
+        const errorMsg = data?.message || `Failed to ${isEditing ? "update" : "post"} job. Please try again.`;
+        setError(errorMsg);
+        toast.error("Submission Failed", errorMsg);
         return;
       }
 
       setSuccess(true);
       setTimeout(() => {
-        if (onJobCreated) onJobCreated(data.job);
-      }, 1200);
+        if (isEditing) {
+          if (onJobUpdated) onJobUpdated(data.job);
+        } else {
+          if (onJobCreated) onJobCreated(data.job);
+        }
+      }, 700);
     } catch (err) {
       console.error(err);
       setError("Something went wrong. Please try again.");
+      toast.error("Network Error", "Could not submit job details. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -268,9 +321,13 @@ export default function PostJobForm({ onJobCreated, onCancel }) {
               <Briefcase size={20} className="text-orange-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Post a New Job</h2>
+              <h2 className="text-xl font-bold text-slate-900">
+                {isEditing ? "Edit Job Posting" : "Post a New Job"}
+              </h2>
               <p className="text-sm text-slate-500">
-                Fill in the details below to publish a job opening
+                {isEditing
+                  ? "Update vacancy details, salary, or location requirements"
+                  : "Fill in the details below to publish a job opening"}
               </p>
             </div>
           </div>
@@ -290,7 +347,11 @@ export default function PostJobForm({ onJobCreated, onCancel }) {
           {success && (
             <div className="mb-6 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
               <CheckCircle2 size={18} className="shrink-0 text-green-500" />
-              <span>Job posted successfully! Redirecting...</span>
+              <span>
+                {isEditing
+                  ? "Job updated successfully! Saving changes..."
+                  : "Job posted successfully! Redirecting..."}
+              </span>
             </div>
           )}
 
@@ -580,15 +641,15 @@ export default function PostJobForm({ onJobCreated, onCancel }) {
                 {loading ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    Publishing...
+                    {isEditing ? "Saving Changes..." : "Publishing..."}
                   </>
                 ) : success ? (
                   <>
                     <Check size={16} />
-                    Published!
+                    {isEditing ? "Updated!" : "Published!"}
                   </>
                 ) : (
-                  "Publish Job"
+                  isEditing ? "Save Changes" : "Publish Job"
                 )}
               </button>
             </div>

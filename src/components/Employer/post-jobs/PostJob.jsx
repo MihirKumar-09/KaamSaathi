@@ -5,6 +5,7 @@ import NavbarLayout from "@/components/navbar/NavbarLayout";
 import FooterLayout from "@/components/footer/FooterLayout";
 import PostJobForm from "./PostJobForm";
 import { AuthContext } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import {
   Briefcase,
   Plus,
@@ -42,6 +43,7 @@ import {
   Sparkles,
   Wind,
   Heart,
+  Pencil,
 } from "lucide-react";
 
 const CATEGORY_ICONS = {
@@ -90,13 +92,14 @@ function formatRelativeTime(dateString) {
 
 export default function PostJob() {
   const { user } = useContext(AuthContext);
+  const { toast, confirmDialog } = useToast();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const [editingJob, setEditingJob] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [actionLoading, setActionLoading] = useState(null);
-  const [banner, setBanner] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
 
   // Fetch employer's jobs
@@ -127,11 +130,6 @@ export default function PostJob() {
     return () => clearTimeout(timer);
   }, [fetchMyJobs]);
 
-  const showBanner = (text, type = "success") => {
-    setBanner({ text, type });
-    setTimeout(() => setBanner(null), 4000);
-  };
-
   // Toggle Open / Closed
   const handleToggleStatus = async (jobId, currentStatus) => {
     try {
@@ -151,20 +149,34 @@ export default function PostJob() {
         if (selectedJob && selectedJob._id === jobId) {
           setSelectedJob((prev) => ({ ...prev, status: newStatus }));
         }
-        showBanner(`Job marked as "${newStatus}"`);
+        toast.success(
+          `Job marked as ${newStatus}`,
+          newStatus === "Open"
+            ? "Your job listing is now live and accepting worker applications."
+            : "Your job listing is now closed to new applicants."
+        );
       } else {
-        showBanner(data.message || "Failed to update job status", "error");
+        toast.error("Failed to Update Status", data.message || "An error occurred.");
       }
     } catch {
-      showBanner("Error updating job", "error");
+      toast.error("Network Error", "Unable to reach the server. Please try again.");
     } finally {
       setActionLoading(null);
     }
   };
 
-  // Delete Job
-  const handleDeleteJob = async (jobId) => {
-    if (!window.confirm("Delete this job posting? This cannot be undone.")) return;
+  // Delete Job with Premium Confirmation Modal
+  const handleDeleteJob = async (jobId, jobTitle = "this job posting") => {
+    const confirmed = await confirmDialog({
+      title: "Delete Job Posting?",
+      message: `Are you sure you want to permanently delete "${jobTitle}"? All associated worker applications will also be removed.`,
+      confirmText: "Delete Job",
+      cancelText: "Cancel",
+      type: "danger",
+    });
+
+    if (!confirmed) return;
+
     try {
       setActionLoading(jobId);
       const res = await fetch(`/api/jobs/${jobId}`, {
@@ -177,12 +189,15 @@ export default function PostJob() {
         if (selectedJob && selectedJob._id === jobId) {
           setSelectedJob(null);
         }
-        showBanner("Job deleted successfully.");
+        toast.success(
+          "Job Deleted Successfully",
+          `"${jobTitle}" has been permanently removed.`
+        );
       } else {
-        showBanner(data.message || "Failed to delete", "error");
+        toast.error("Delete Failed", data.message || "Could not delete this job.");
       }
     } catch {
-      showBanner("Error deleting job", "error");
+      toast.error("Network Error", "Could not complete deletion. Please try again.");
     } finally {
       setActionLoading(null);
     }
@@ -191,7 +206,25 @@ export default function PostJob() {
   const handleJobCreated = (newJob) => {
     setJobs((prev) => [newJob, ...prev]);
     setIsCreating(false);
-    showBanner(`"${newJob.title}" published successfully!`);
+    toast.success(
+      "Job Published Successfully!",
+      `"${newJob.title}" is now published and active.`
+    );
+  };
+
+  const handleJobUpdated = (updatedJob) => {
+    setJobs((prev) =>
+      prev.map((j) => (j._id === updatedJob._id ? updatedJob : j))
+    );
+    if (selectedJob && selectedJob._id === updatedJob._id) {
+      setSelectedJob(updatedJob);
+    }
+    setEditingJob(null);
+    setIsCreating(false);
+    toast.success(
+      "Job Updated Successfully!",
+      `Changes to "${updatedJob.title}" have been saved.`
+    );
   };
 
   // Stats
@@ -219,33 +252,16 @@ export default function PostJob() {
       <NavbarLayout role="employer" />
 
       <main className="flex-1 px-4 py-8 sm:px-6 lg:px-12 max-w-7xl mx-auto w-full">
-        {/* Banner */}
-        {banner && (
-          <div
-            className={`mb-6 flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm font-medium ${
-              banner.type === "error"
-                ? "border-red-200 bg-red-50 text-red-700"
-                : "border-green-200 bg-green-50 text-green-700"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <CheckCircle2 size={16} />
-              <span>{banner.text}</span>
-            </div>
-            <button
-              onClick={() => setBanner(null)}
-              className="text-xs opacity-60 hover:opacity-100 transition cursor-pointer"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
-        {isCreating ? (
-          /* ── FORM VIEW ── */
+        {isCreating || editingJob ? (
+          /* ── FORM VIEW (CREATE OR EDIT) ── */
           <PostJobForm
+            initialData={editingJob}
             onJobCreated={handleJobCreated}
-            onCancel={() => setIsCreating(false)}
+            onJobUpdated={handleJobUpdated}
+            onCancel={() => {
+              setIsCreating(false);
+              setEditingJob(null);
+            }}
           />
         ) : (
           <>
@@ -568,6 +584,17 @@ export default function PostJob() {
                                 <span>View</span>
                               </button>
 
+                              {/* Edit Job */}
+                              <button
+                                onClick={() => setEditingJob(job)}
+                                disabled={isBusy}
+                                title="Edit job posting"
+                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 hover:border-blue-600 text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                              >
+                                <Pencil size={13} />
+                                <span>Edit</span>
+                              </button>
+
                               {/* Toggle Status */}
                               <button
                                 onClick={() => handleToggleStatus(job._id, job.status)}
@@ -589,7 +616,7 @@ export default function PostJob() {
 
                               {/* Delete */}
                               <button
-                                onClick={() => handleDeleteJob(job._id)}
+                                onClick={() => handleDeleteJob(job._id, job.title)}
                                 disabled={isBusy}
                                 title="Delete job posting"
                                 className="inline-flex items-center justify-center h-8 w-8 rounded-xl bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-200 hover:border-red-600 transition-all duration-200 shadow-2xs cursor-pointer disabled:opacity-50"
@@ -727,6 +754,18 @@ export default function PostJob() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
+                    const toEdit = selectedJob;
+                    setSelectedJob(null);
+                    setEditingJob(toEdit);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 text-xs font-bold transition cursor-pointer"
+                >
+                  <Pencil size={14} />
+                  <span>Edit Job</span>
+                </button>
+
+                <button
+                  onClick={() => {
                     handleToggleStatus(selectedJob._id, selectedJob.status);
                   }}
                   disabled={actionLoading === selectedJob._id}
@@ -742,7 +781,7 @@ export default function PostJob() {
 
                 <button
                   onClick={() => {
-                    handleDeleteJob(selectedJob._id);
+                    handleDeleteJob(selectedJob._id, selectedJob.title);
                   }}
                   disabled={actionLoading === selectedJob._id}
                   className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 text-xs font-bold transition cursor-pointer disabled:opacity-50"

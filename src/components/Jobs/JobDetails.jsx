@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import NavbarLayout from "@/components/navbar/NavbarLayout";
 import FooterLayout from "@/components/footer/FooterLayout";
 import { AuthContext } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
+import PostJobForm from "@/components/Employer/post-jobs/PostJobForm";
 import {
   MapPin,
   Users,
@@ -16,6 +18,7 @@ import {
   Calendar,
   Share2,
   ArrowLeft,
+  ArrowRight,
   Briefcase,
   Layers,
   Car,
@@ -42,6 +45,9 @@ import {
   Eye,
   Check,
   Lock,
+  Pencil,
+  Trash2,
+  Power,
 } from "lucide-react";
 
 const CATEGORY_ICONS = {
@@ -91,6 +97,7 @@ function formatRelativeTime(dateString) {
 export default function JobDetails({ jobId }) {
   const router = useRouter();
   const { user } = useContext(AuthContext);
+  const { toast, confirmDialog } = useToast();
 
   const [job, setJob] = useState(null);
   const [relatedJobs, setRelatedJobs] = useState([]);
@@ -103,7 +110,13 @@ export default function JobDetails({ jobId }) {
   const [applySuccessModal, setApplySuccessModal] = useState(false);
   const [loginPromptModal, setLoginPromptModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [feedbackBanner, setFeedbackBanner] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Owner management states
+  const [isOwner, setIsOwner] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [ownerActionLoading, setOwnerActionLoading] = useState(false);
 
   // Fetch Job details
   const fetchJobData = useCallback(async () => {
@@ -123,6 +136,7 @@ export default function JobDetails({ jobId }) {
         setRelatedJobs(data.relatedJobs || []);
         setHasApplied(data.hasApplied || false);
         setApplicationStatus(data.applicationStatus || null);
+        setIsOwner(Boolean(data.isOwner));
       } else {
         setError(data.message || "Failed to load job details.");
       }
@@ -149,14 +163,15 @@ export default function JobDetails({ jobId }) {
     }
 
     if (user.role === "employer") {
-      setErrorMessage("Employers cannot apply for jobs. Please log in with a worker account.");
-      setTimeout(() => setErrorMessage(null), 4000);
+      toast.warning(
+        "Action Not Allowed",
+        "Employers cannot apply for jobs. Please log in with a worker account."
+      );
       return;
     }
 
     try {
       setApplying(true);
-      setErrorMessage(null);
 
       const res = await fetch(`/api/jobs/${jobId}/apply`, {
         method: "POST",
@@ -169,15 +184,19 @@ export default function JobDetails({ jobId }) {
         setHasApplied(true);
         setApplicationStatus("Pending");
         setApplySuccessModal(true);
+        toast.success(
+          "Application Submitted!",
+          `You have successfully applied for "${job?.title}". The employer will reach out soon.`
+        );
       } else {
-        setErrorMessage(data.message || "Failed to submit application.");
         if (data.status) {
           setHasApplied(true);
           setApplicationStatus(data.status);
         }
+        toast.error("Application Failed", data.message || "Could not submit your application.");
       }
     } catch {
-      setErrorMessage("Error submitting application. Please try again.");
+      toast.error("Network Error", "Error submitting application. Please try again.");
     } finally {
       setApplying(false);
     }
@@ -191,12 +210,88 @@ export default function JobDetails({ jobId }) {
     }
   };
 
+  const effectiveIsOwner =
+    isOwner ||
+    Boolean(
+      user &&
+        job?.employerId &&
+        ((user._id &&
+          (user._id === job.employerId._id || user._id === job.employerId)) ||
+          (user.userId &&
+            (user.userId === job.employerId._id ||
+              user.userId === job.employerId)) ||
+          user.role === "admin")
+    );
+
+  const handleToggleStatus = async () => {
+    try {
+      setOwnerActionLoading(true);
+      const nextStatus = job.status === "Open" ? "Closed" : "Open";
+      const res = await fetch(`/api/jobs/${jobId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setJob((prev) => ({ ...prev, status: nextStatus }));
+        toast.success(
+          `Job marked as ${nextStatus}`,
+          nextStatus === "Open"
+            ? "Your listing is now live and accepting applications."
+            : "Your listing is now closed to new applicants."
+        );
+      } else {
+        toast.error("Status Update Failed", data.message || "Could not update job status.");
+      }
+    } catch {
+      toast.error("Network Error", "Unable to reach server. Please try again.");
+    } finally {
+      setOwnerActionLoading(false);
+    }
+  };
+
+  const handleDeleteJob = async () => {
+    const confirmed = await confirmDialog({
+      title: "Delete Job Posting?",
+      message: `Permanently delete "${job?.title}"? All worker applications will also be removed. This cannot be undone.`,
+      confirmText: "Delete Job",
+      cancelText: "Keep It",
+      type: "danger",
+    });
+
+    if (!confirmed) return;
+
+    try {
+      setOwnerActionLoading(true);
+      const res = await fetch(`/api/jobs/${jobId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(
+          "Job Deleted",
+          `"${job?.title}" has been permanently removed. Redirecting…`
+        );
+        setTimeout(() => router.push("/post-job"), 1400);
+      } else {
+        toast.error("Delete Failed", data.message || "Could not delete this job.");
+      }
+    } catch {
+      toast.error("Network Error", "Could not complete deletion. Please try again.");
+    } finally {
+      setOwnerActionLoading(false);
+    }
+  };
+
   const CategoryIcon = job ? CATEGORY_ICONS[job.category] || Briefcase : Briefcase;
   const employerName = job?.employerId?.name || "Direct Employer";
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col selection:bg-orange-100 selection:text-orange-900">
-      <NavbarLayout role={user?.role || "worker"} />
+      <NavbarLayout role={user?.role === "employer" ? "employer" : "worker"} />
 
       <main className="flex-1 px-4 py-8 sm:px-6 lg:px-12 max-w-7xl mx-auto w-full">
         {/* ── BREADCRUMB & BACK NAVIGATION ── */}
@@ -206,12 +301,15 @@ export default function JobDetails({ jobId }) {
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50 hover:border-orange-200 transition cursor-pointer shadow-2xs"
           >
             <ArrowLeft size={15} />
-            <span>Back to Jobs</span>
+            <span>Back</span>
           </button>
 
           <div className="hidden sm:flex items-center gap-2 text-xs font-semibold text-slate-400">
-            <Link href="/worker/dashboard" className="hover:text-orange-600 transition">
-              Home
+            <Link
+              href={user?.role === "employer" ? "/post-job" : "/worker/dashboard"}
+              className="hover:text-orange-600 transition"
+            >
+              {user?.role === "employer" ? "Employer Dashboard" : "Home"}
             </Link>
             <span>/</span>
             <span>Jobs</span>
@@ -220,19 +318,44 @@ export default function JobDetails({ jobId }) {
           </div>
         </div>
 
-        {/* ── ERROR ALERT ── */}
-        {errorMessage && (
-          <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
-            <div className="flex items-center gap-2">
-              <AlertCircle size={18} />
-              <span>{errorMessage}</span>
+        {/* ── OWNER NOTICE & SHORTCUTS ── */}
+        {!loading && job && effectiveIsOwner && (
+          <div className="mb-6 rounded-3xl border border-orange-200 bg-linear-to-r from-orange-50 via-amber-50 to-orange-50/50 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-md shadow-orange-500/20">
+                <Briefcase size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base font-black text-slate-900">
+                    You posted this job opening
+                  </h2>
+                  <span className="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-orange-200 text-orange-900">
+                    Employer
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 font-medium mt-0.5">
+                  You can edit job details, toggle the open/closed status, or manage this listing anytime.
+                </p>
+              </div>
             </div>
-            <button
-              onClick={() => setErrorMessage(null)}
-              className="text-xs opacity-70 hover:opacity-100 transition cursor-pointer"
-            >
-              ✕
-            </button>
+
+            <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 text-xs font-bold transition cursor-pointer shadow-2xs"
+              >
+                <Pencil size={13} />
+                <span>Edit Posting</span>
+              </button>
+              <Link
+                href="/post-job"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition cursor-pointer shadow-2xs"
+              >
+                <span>Manage All Jobs</span>
+                <ArrowRight size={13} />
+              </Link>
+            </div>
           </div>
         )}
 
@@ -348,8 +471,45 @@ export default function JobDetails({ jobId }) {
                     )}
                   </button>
 
-                  {/* Apply Now Primary Action */}
-                  {hasApplied ? (
+                  {/* Owner Controls or Apply Button */}
+                  {effectiveIsOwner ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="inline-flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 transition cursor-pointer"
+                      >
+                        <Pencil size={15} />
+                        <span>Edit Job</span>
+                      </button>
+
+                      <button
+                        onClick={handleToggleStatus}
+                        disabled={ownerActionLoading}
+                        className={`inline-flex items-center gap-1.5 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition cursor-pointer shadow-xs disabled:opacity-50 ${
+                          job.status === "Open"
+                            ? "bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300"
+                            : "bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300"
+                        }`}
+                      >
+                        {ownerActionLoading ? (
+                          <Loader2 size={15} className="animate-spin" />
+                        ) : (
+                          <Power size={15} />
+                        )}
+                        <span>{job.status === "Open" ? "Close Job" : "Reopen Job"}</span>
+                      </button>
+
+                      <button
+                        onClick={handleDeleteJob}
+                        disabled={ownerActionLoading}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-3 rounded-2xl bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-200 hover:border-red-600 text-xs sm:text-sm font-bold transition cursor-pointer disabled:opacity-50"
+                        title="Delete job posting"
+                      >
+                        <Trash2 size={15} />
+                        <span className="hidden sm:inline">Delete</span>
+                      </button>
+                    </div>
+                  ) : hasApplied ? (
                     <div className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-sm font-bold shadow-xs">
                       <CheckCircle2 size={18} className="text-emerald-600" />
                       <span>Applied • {applicationStatus || "Pending Review"}</span>
@@ -923,6 +1083,26 @@ export default function JobDetails({ jobId }) {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── EDIT JOB MODAL (EMPLOYER CRUD) ── */}
+      {isEditing && job && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto">
+          <div className="relative w-full max-w-4xl my-8 bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto">
+            <PostJobForm
+              initialData={job}
+              onJobUpdated={(updatedJob) => {
+                setJob(updatedJob);
+                setIsEditing(false);
+                toast.success(
+                  "Job Updated Successfully!",
+                  `Changes to "${updatedJob.title}" have been saved.`
+                );
+              }}
+              onCancel={() => setIsEditing(false)}
+            />
           </div>
         </div>
       )}

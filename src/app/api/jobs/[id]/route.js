@@ -37,12 +37,21 @@ export async function GET(req, { params }) {
       );
     }
 
-    // Check if authenticated user has already applied
+    // Check if authenticated user is the job owner or has applied
     let hasApplied = false;
     let applicationStatus = null;
+    let isOwner = false;
 
     const authUser = await getAuthenticatedUser();
     if (authUser && authUser.userId) {
+      const employerIdStr = job.employerId?._id
+        ? job.employerId._id.toString()
+        : job.employerId?.toString();
+
+      if (authUser.userId === employerIdStr || authUser.role === "admin") {
+        isOwner = true;
+      }
+
       const existingApp = await Application.findOne({
         workerId: authUser.userId,
         jobId: id,
@@ -82,6 +91,7 @@ export async function GET(req, { params }) {
         relatedJobs,
         hasApplied,
         applicationStatus,
+        isOwner,
       },
       { status: 200 }
     );
@@ -125,19 +135,46 @@ export async function PATCH(req, { params }) {
 
     const body = await req.json();
 
-    if (body.status) {
+    if (body.status !== undefined) {
       job.status = body.status === "Closed" ? "Closed" : "Open";
     }
 
-    if (body.title) job.title = body.title.trim();
-    if (body.description) job.description = body.description.trim();
-    if (body.vacancy) job.vacancy = Math.max(1, parseInt(body.vacancy, 10));
-    if (body.salary?.amount !== undefined) {
-      job.salary.amount = Number(body.salary.amount);
-      if (body.salary.type) job.salary.type = body.salary.type;
+    if (body.title !== undefined) job.title = body.title.trim();
+    if (body.category !== undefined) job.category = body.category.trim();
+    if (body.description !== undefined) job.description = body.description.trim();
+    if (body.vacancy !== undefined) job.vacancy = Math.max(1, parseInt(body.vacancy, 10) || 1);
+
+    if (body.salary) {
+      if (body.salary.amount !== undefined) {
+        job.salary.amount = Number(body.salary.amount);
+      }
+      if (body.salary.type !== undefined) {
+        job.salary.type = body.salary.type;
+      }
+    }
+
+    if (body.location) {
+      if (body.location.state !== undefined) job.location.state = body.location.state.trim();
+      if (body.location.city !== undefined) job.location.city = body.location.city.trim();
+      if (body.location.address !== undefined) job.location.address = body.location.address.trim();
+      if (body.location.pincode !== undefined) {
+        const cleanPin = body.location.pincode.toString().trim();
+        if (/^\d{6}$/.test(cleanPin)) {
+          job.location.pincode = cleanPin;
+        }
+      }
+      if (body.location.coordinates) {
+        if (body.location.coordinates.latitude !== undefined) {
+          job.location.coordinates.latitude = body.location.coordinates.latitude;
+        }
+        if (body.location.coordinates.longitude !== undefined) {
+          job.location.coordinates.longitude = body.location.coordinates.longitude;
+        }
+      }
     }
 
     await job.save();
+    await job.populate("employerId", "name email phone");
 
     return NextResponse.json(
       {
@@ -185,6 +222,7 @@ export async function DELETE(req, { params }) {
     }
 
     await Job.findByIdAndDelete(id);
+    await Application.deleteMany({ jobId: id });
 
     return NextResponse.json(
       {
