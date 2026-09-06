@@ -1,12 +1,7 @@
-import NavbarLayout from "../navbar/NavbarLayout";
-import FooterLayout from "../footer/FooterLayout";
-import NoJobs from "../Common/NoJobs";
+"use client";
+
+import PostJob from "./post-jobs/PostJob";
+
 export default function EmployerDashboard() {
-  return (
-    <div>
-      <NavbarLayout />
-      <NoJobs />
-      <FooterLayout />
-    </div>
-  );
+  return <PostJob />;
 }

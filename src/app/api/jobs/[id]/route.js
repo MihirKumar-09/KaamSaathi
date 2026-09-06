@@ -1,4 +1,6 @@
 import Job from "@/models/jobSchema";
+import User from "@/models/usersSchema";
+import Application from "@/models/applicationSchema";
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
@@ -14,6 +16,80 @@ async function getAuthenticatedUser() {
     return decoded;
   } catch {
     return null;
+  }
+}
+
+// GET: Fetch single job details, application status, and related jobs
+export async function GET(req, { params }) {
+  try {
+    await connectDB();
+    const { id } = await params;
+
+    const job = await Job.findById(id).populate(
+      "employerId",
+      "name email phone companyName createdAt"
+    );
+
+    if (!job) {
+      return NextResponse.json(
+        { success: false, message: "Job not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if authenticated user has already applied
+    let hasApplied = false;
+    let applicationStatus = null;
+
+    const authUser = await getAuthenticatedUser();
+    if (authUser && authUser.userId) {
+      const existingApp = await Application.findOne({
+        workerId: authUser.userId,
+        jobId: id,
+      });
+      if (existingApp) {
+        hasApplied = true;
+        applicationStatus = existingApp.status;
+      }
+    }
+
+    // Fetch related jobs in same category (or fallback to latest open jobs), excluding current job
+    let relatedJobs = await Job.find({
+      _id: { $ne: id },
+      status: "Open",
+      category: job.category,
+    })
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .populate("employerId", "name email phone");
+
+    if (relatedJobs.length < 2) {
+      const moreJobs = await Job.find({
+        _id: { $nin: [id, ...relatedJobs.map((j) => j._id)] },
+        status: "Open",
+      })
+        .sort({ createdAt: -1 })
+        .limit(4 - relatedJobs.length)
+        .populate("employerId", "name email phone");
+
+      relatedJobs = [...relatedJobs, ...moreJobs];
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        job,
+        relatedJobs,
+        hasApplied,
+        applicationStatus,
+      },
+      { status: 200 }
+    );
+  } catch (err) {
+    return NextResponse.json(
+      { success: false, message: err.message || "Failed to fetch job details" },
+      { status: 500 }
+    );
   }
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useContext, useRef } from "react";
+import Link from "next/link";
 import NavbarLayout from "../navbar/NavbarLayout";
 import FooterLayout from "../footer/FooterLayout";
 import { AuthContext } from "@/context/AuthContext";
@@ -19,6 +20,7 @@ import {
   SearchX,
   Eye,
   ShieldCheck,
+  Send,
   Layers,
   Car,
   Zap,
@@ -119,8 +121,6 @@ export default function WorkerDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [cityFilter, setCityFilter] = useState("");
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [copiedPhone, setCopiedPhone] = useState(false);
   const scrollRef = useRef(null);
 
   const scrollCategories = (direction) => {
@@ -187,13 +187,6 @@ export default function WorkerDashboard() {
     setSearchQuery("");
     setSelectedCategory("All");
     setCityFilter("");
-  };
-
-  const handleCopyPhone = (phoneNumber) => {
-    if (!phoneNumber) return;
-    navigator.clipboard.writeText(phoneNumber);
-    setCopiedPhone(true);
-    setTimeout(() => setCopiedPhone(false), 2500);
   };
 
   return (
@@ -496,13 +489,14 @@ export default function WorkerDashboard() {
                     </div>
 
                     {/* Job Title */}
-                    <h3
-                      onClick={() => setSelectedJob(job)}
-                      className="text-xl sm:text-2xl font-black text-slate-900 group-hover:text-orange-600 transition-colors mt-4 line-clamp-1 cursor-pointer"
-                      title={job.title}
-                    >
-                      {job.title}
-                    </h3>
+                    <Link href={`/jobs/${job._id}`}>
+                      <h3
+                        className="text-xl sm:text-2xl font-black text-slate-900 group-hover:text-orange-600 transition-colors mt-4 line-clamp-1 cursor-pointer"
+                        title={job.title}
+                      >
+                        {job.title}
+                      </h3>
+                    </Link>
 
                     {/* Modern Highlights Grid: Salary, Location, Vacancy */}
                     <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -564,24 +558,21 @@ export default function WorkerDashboard() {
                     </span>
 
                     <div className="flex items-center gap-2">
-                      {employerPhone && (
-                        <a
-                          href={`tel:${employerPhone}`}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 hover:border-emerald-600 text-xs font-bold transition-all duration-200 shadow-2xs cursor-pointer"
-                          title="Call Employer directly"
-                        >
-                          <Phone size={14} />
-                          <span>Call</span>
-                        </a>
-                      )}
-
-                      <button
-                        onClick={() => setSelectedJob(job)}
-                        className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl bg-slate-900 hover:bg-orange-500 text-white text-xs font-bold transition-all duration-200 shadow-sm hover:shadow-orange-500/25 cursor-pointer"
+                      <Link
+                        href={`/jobs/${job._id}`}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition-all duration-200 shadow-sm hover:shadow-orange-500/25 cursor-pointer"
                       >
-                        <Eye size={14} />
+                        <Send size={13} />
+                        <span>Apply Now</span>
+                      </Link>
+
+                      <Link
+                        href={`/jobs/${job._id}`}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all duration-200 shadow-sm cursor-pointer"
+                      >
+                        <Eye size={13} />
                         <span>View Details</span>
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -590,175 +581,6 @@ export default function WorkerDashboard() {
           </div>
         )}
       </main>
-
-      {/* ── JOB DETAILS MODAL ── */}
-      {selectedJob && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedJob(null)}
-              className="absolute right-5 top-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
-            >
-              <X size={20} />
-            </button>
-
-            {/* Modal Header */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700 border border-orange-200">
-                  {selectedJob.category}
-                </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  <CheckCircle2 size={12} />
-                  Active / Open
-                </span>
-                <span className="text-xs text-slate-400 font-medium ml-auto pr-8">
-                  {formatRelativeTime(selectedJob.createdAt)}
-                </span>
-              </div>
-
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-2">
-                {selectedJob.title}
-              </h2>
-
-              <p className="text-xs font-semibold text-slate-500 mt-1 flex items-center gap-1.5">
-                <Building2 size={14} className="text-slate-400" />
-                Posted by {selectedJob.employerId?.name || "Direct Employer"}
-              </p>
-            </div>
-
-            {/* Highlights Grid */}
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <p className="text-xs font-medium text-slate-400">Offered Salary</p>
-                <p className="mt-1 text-base font-black text-slate-900">
-                  ₹{selectedJob.salary?.amount?.toLocaleString("en-IN")}
-                </p>
-                <p className="text-xs text-slate-500 font-medium">
-                  {selectedJob.salary?.type || "Monthly"}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <p className="text-xs font-medium text-slate-400">Total Vacancies</p>
-                <p className="mt-1 text-base font-black text-slate-900">
-                  {selectedJob.vacancy} {selectedJob.vacancy > 1 ? "Workers" : "Worker"}
-                </p>
-                <p className="text-xs text-slate-500 font-medium">Urgent requirement</p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <p className="text-xs font-medium text-slate-400">City & State</p>
-                <p className="mt-1 text-base font-black text-slate-900 truncate">
-                  {selectedJob.location?.city}
-                </p>
-                <p className="text-xs text-slate-500 font-medium truncate">
-                  {selectedJob.location?.state} ({selectedJob.location?.pincode})
-                </p>
-              </div>
-            </div>
-
-            {/* Full Location details */}
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
-                  <MapPin size={18} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Exact Work Location
-                  </h4>
-                  <p className="mt-1 text-sm font-medium text-slate-800">
-                    {selectedJob.location?.address
-                      ? `${selectedJob.location.address}, `
-                      : ""}
-                    {selectedJob.location?.city}, {selectedJob.location?.state} -{" "}
-                    {selectedJob.location?.pincode}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Job Description */}
-            <div className="mt-6">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Job Description & Requirements
-              </h4>
-              <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 text-sm text-slate-700 whitespace-pre-line leading-relaxed">
-                {selectedJob.description}
-              </div>
-            </div>
-
-            {/* Employer Contact Card */}
-            <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={18} className="text-emerald-600" />
-                  <h4 className="text-sm font-bold text-emerald-950">
-                    Direct Employer Contact
-                  </h4>
-                </div>
-                <span className="text-xs text-emerald-700 font-medium">
-                  Verified Contact
-                </span>
-              </div>
-
-              <p className="text-xs text-slate-600 mb-4">
-                Connect directly with <strong>{selectedJob.employerId?.name}</strong> to apply and discuss work details. No middleman charges.
-              </p>
-
-              <div className="flex flex-wrap items-center gap-3">
-                {selectedJob.employerId?.phone ? (
-                  <>
-                    <a
-                      href={`tel:${selectedJob.employerId.phone}`}
-                      className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition shadow-sm cursor-pointer"
-                    >
-                      <Phone size={16} />
-                      Call {selectedJob.employerId.phone}
-                    </a>
-
-                    <button
-                      onClick={() => handleCopyPhone(selectedJob.employerId.phone)}
-                      className="px-4 py-2.5 rounded-xl bg-white border border-emerald-200 text-emerald-800 text-sm font-semibold hover:bg-emerald-50 transition cursor-pointer"
-                    >
-                      {copiedPhone ? "Copied!" : "Copy Number"}
-                    </button>
-                  </>
-                ) : (
-                  <p className="text-xs text-slate-500">
-                    Phone contact not provided.
-                  </p>
-                )}
-
-                {selectedJob.employerId?.email && (
-                  <a
-                    href={`mailto:${selectedJob.employerId.email}?subject=Job Application for ${encodeURIComponent(selectedJob.title)}`}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-semibold transition cursor-pointer"
-                  >
-                    <Mail size={16} />
-                    Email
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {/* Footer Buttons */}
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setSelectedJob(null)}
-                className="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <FooterLayout />
     </div>
