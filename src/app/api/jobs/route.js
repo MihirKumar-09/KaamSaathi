@@ -21,15 +21,15 @@ async function getAuthenticatedUser() {
   }
 }
 
-// GET: Fetch jobs posted by the employer (or all open jobs if public)
+// GET: Fetch jobs posted by the employer (if ?my=true) or all active open jobs (for workers/public)
 export async function GET(req) {
   try {
     await connectDB();
-    const authUser = await getAuthenticatedUser();
     const { searchParams } = new URL(req.url);
-    const filterMyJobs = searchParams.get("my") === "true" || !searchParams.has("public");
+    const filterMyJobs = searchParams.get("my") === "true";
 
     if (filterMyJobs) {
+      const authUser = await getAuthenticatedUser();
       if (!authUser) {
         return NextResponse.json(
           { success: false, message: "Unauthorized. Please log in." },
@@ -51,13 +51,37 @@ export async function GET(req) {
       );
     }
 
-    // Public jobs listing (for workers)
+    // Public / Worker active jobs listing
     const category = searchParams.get("category");
     const city = searchParams.get("city");
+    const state = searchParams.get("state");
+    const searchQuery = searchParams.get("q");
+
+    // Only active (Open) jobs are visible to workers
     const query = { status: "Open" };
 
-    if (category) query.category = category;
-    if (city) query["location.city"] = new RegExp(city, "i");
+    if (category && category !== "All") {
+      query.category = category;
+    }
+
+    if (city) {
+      query["location.city"] = new RegExp(city.trim(), "i");
+    }
+
+    if (state) {
+      query["location.state"] = new RegExp(state.trim(), "i");
+    }
+
+    if (searchQuery && searchQuery.trim()) {
+      const regex = new RegExp(searchQuery.trim(), "i");
+      query.$or = [
+        { title: regex },
+        { description: regex },
+        { category: regex },
+        { "location.city": regex },
+        { "location.state": regex },
+      ];
+    }
 
     const jobs = await Job.find(query)
       .sort({ createdAt: -1 })
