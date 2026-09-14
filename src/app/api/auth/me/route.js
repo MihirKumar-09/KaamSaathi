@@ -59,6 +59,9 @@ export async function GET() {
           role: user.role,
           gender: user.gender,
           location: user.location,
+          profileImage: user.profileImage || "",
+          bio: user.bio || "",
+          createdAt: user.createdAt,
         },
       },
       { status: 200 }

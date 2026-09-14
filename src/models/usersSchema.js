@@ -66,6 +66,16 @@ const userSchema = new mongoose.Schema(
         },
       },
     },
+    profileImage: {
+      type: String,
+      default: "",
+    },
+    bio: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 500,
+    },
   },
   { timestamps: true },
 );

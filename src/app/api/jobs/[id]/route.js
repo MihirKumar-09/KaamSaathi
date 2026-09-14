@@ -40,6 +40,8 @@ export async function GET(req, { params }) {
     // Check if authenticated user is the job owner or has applied
     let hasApplied = false;
     let applicationStatus = null;
+    let myApplication = null;
+    let applications = [];
     let isOwner = false;
 
     const authUser = await getAuthenticatedUser();
@@ -50,6 +52,9 @@ export async function GET(req, { params }) {
 
       if (authUser.userId === employerIdStr || authUser.role === "admin") {
         isOwner = true;
+        applications = await Application.find({ jobId: id })
+          .populate("workerId", "name email phone location")
+          .sort({ createdAt: -1 });
       }
 
       const existingApp = await Application.findOne({
@@ -59,6 +64,7 @@ export async function GET(req, { params }) {
       if (existingApp) {
         hasApplied = true;
         applicationStatus = existingApp.status;
+        myApplication = existingApp;
       }
     }
 
@@ -91,6 +97,8 @@ export async function GET(req, { params }) {
         relatedJobs,
         hasApplied,
         applicationStatus,
+        myApplication,
+        applications,
         isOwner,
       },
       { status: 200 }

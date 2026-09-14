@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useContext } from "react";
+import Link from "next/link";
 import NavbarLayout from "@/components/navbar/NavbarLayout";
 import FooterLayout from "@/components/footer/FooterLayout";
 import PostJobForm from "./PostJobForm";
@@ -791,12 +792,22 @@ export default function PostJob() {
                 </button>
               </div>
 
-              <button
-                onClick={() => setSelectedJob(null)}
-                className="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition cursor-pointer"
-              >
-                Close
-              </button>
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/jobs/${selectedJob._id}`}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition cursor-pointer shadow-sm shadow-orange-500/25"
+                >
+                  <Users size={14} />
+                  <span>View Applicants & Page</span>
+                </Link>
+
+                <button
+                  onClick={() => setSelectedJob(null)}
+                  className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
