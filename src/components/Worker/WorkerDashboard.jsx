@@ -472,6 +472,12 @@ export default function WorkerDashboard() {
                               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                               Hiring Now
                             </span>
+                            {job.hasApplied && (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-100/80 border border-emerald-300 px-2 py-0.5 rounded-full">
+                                <CheckCircle2 size={11} className="text-emerald-700" />
+                                Applied
+                              </span>
+                            )}
                           </div>
 
                           <p className="flex items-center gap-1.5 mt-1 text-xs font-semibold text-slate-500">
@@ -558,13 +564,30 @@ export default function WorkerDashboard() {
                     </span>
 
                     <div className="flex items-center gap-2">
-                      <Link
-                        href={`/jobs/${job._id}`}
-                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition-all duration-200 shadow-sm hover:shadow-orange-500/25 cursor-pointer"
-                      >
-                        <Send size={13} />
-                        <span>Apply Now</span>
-                      </Link>
+                      {job.hasApplied ? (
+                        <Link
+                          href={`/jobs/${job._id}`}
+                          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-bold transition-all duration-200 shadow-2xs cursor-pointer"
+                          title="View your submitted application"
+                        >
+                          <CheckCircle2 size={13} className="text-emerald-600" />
+                          <span>
+                            {job.applicationStatus === "Accepted"
+                              ? "Applied • Accepted"
+                              : job.applicationStatus === "Rejected"
+                              ? "Applied • Rejected"
+                              : "Already Applied"}
+                          </span>
+                        </Link>
+                      ) : (
+                        <Link
+                          href={`/jobs/${job._id}`}
+                          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition-all duration-200 shadow-sm hover:shadow-orange-500/25 cursor-pointer"
+                        >
+                          <Send size={13} />
+                          <span>Apply Now</span>
+                        </Link>
+                      )}
 
                       <Link
                         href={`/jobs/${job._id}`}

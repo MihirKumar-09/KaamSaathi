@@ -1,5 +1,6 @@
 import Job from "@/models/jobSchema";
 import User from "@/models/usersSchema";
+import Application from "@/models/applicationSchema";
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
@@ -21,12 +22,21 @@ async function getAuthenticatedUser() {
   }
 }
 
-// GET: Fetch jobs posted by the employer (if ?my=true) or all active open jobs (for workers/public)
+// GET: Fetch jobs with advanced filtering, scope (all vs my), status, and sorting
 export async function GET(req) {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
-    const filterMyJobs = searchParams.get("my") === "true";
+    const scope = searchParams.get("scope");
+    const filterMyJobs = searchParams.get("my") === "true" || scope === "my";
+    const statusParam = searchParams.get("status");
+    const category = searchParams.get("category");
+    const city = searchParams.get("city");
+    const state = searchParams.get("state");
+    const searchQuery = searchParams.get("q");
+    const sortParam = searchParams.get("sort");
+
+    let query = {};
 
     if (filterMyJobs) {
       const authUser = await getAuthenticatedUser();
@@ -36,42 +46,31 @@ export async function GET(req) {
           { status: 401 }
         );
       }
-
-      const jobs = await Job.find({ employerId: authUser.userId })
-        .sort({ createdAt: -1 })
-        .populate("employerId", "name email phone");
-
-      return NextResponse.json(
-        {
-          success: true,
-          count: jobs.length,
-          jobs,
-        },
-        { status: 200 }
-      );
+      query.employerId = authUser.userId;
     }
 
-    // Public / Worker active jobs listing
-    const category = searchParams.get("category");
-    const city = searchParams.get("city");
-    const state = searchParams.get("state");
-    const searchQuery = searchParams.get("q");
+    // Status filter
+    if (statusParam && statusParam !== "All") {
+      query.status = statusParam;
+    } else if (!statusParam && !filterMyJobs && scope !== "all") {
+      // Default for worker/public feed without scope=all: Only show Open jobs
+      query.status = "Open";
+    }
 
-    // Only active (Open) jobs are visible to workers
-    const query = { status: "Open" };
-
+    // Category filter
     if (category && category !== "All") {
       query.category = category;
     }
 
+    // City & State
     if (city) {
       query["location.city"] = new RegExp(city.trim(), "i");
     }
-
     if (state) {
       query["location.state"] = new RegExp(state.trim(), "i");
     }
 
+    // Keyword Search across title, description, category, city, state
     if (searchQuery && searchQuery.trim()) {
       const regex = new RegExp(searchQuery.trim(), "i");
       query.$or = [
@@ -83,15 +82,47 @@ export async function GET(req) {
       ];
     }
 
+    // Sorting
+    let sortOption = { createdAt: -1 };
+    if (sortParam === "salary_high") {
+      sortOption = { "salary.amount": -1, createdAt: -1 };
+    } else if (sortParam === "vacancies") {
+      sortOption = { vacancy: -1, createdAt: -1 };
+    } else if (sortParam === "oldest") {
+      sortOption = { createdAt: 1 };
+    }
+
     const jobs = await Job.find(query)
-      .sort({ createdAt: -1 })
+      .sort(sortOption)
       .populate("employerId", "name email phone");
+
+    // Check application status for authenticated user
+    const authUser = await getAuthenticatedUser();
+    let appliedJobMap = {};
+    if (authUser && authUser.userId) {
+      const userApps = await Application.find({ workerId: authUser.userId }).select("jobId status");
+      userApps.forEach((app) => {
+        if (app.jobId) {
+          appliedJobMap[app.jobId.toString()] = app.status;
+        }
+      });
+    }
+
+    const formattedJobs = jobs.map((j) => {
+      const jobObj = j.toObject ? j.toObject() : j;
+      const status = appliedJobMap[jobObj._id.toString()];
+      return {
+        ...jobObj,
+        hasApplied: Boolean(status),
+        applicationStatus: status || null,
+      };
+    });
 
     return NextResponse.json(
       {
         success: true,
-        count: jobs.length,
-        jobs,
+        count: formattedJobs.length,
+        jobs: formattedJobs,
       },
       { status: 200 }
     );

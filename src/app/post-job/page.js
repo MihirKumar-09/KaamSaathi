@@ -3,8 +3,8 @@ import PostJob from "@/components/Employer/post-jobs/PostJob";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Post a Job | KaamSaathi Employer",
-  description: "Hire skilled workers and post vacancies on KaamSaathi",
+  title: "All Jobs | KaamSaathi Employer Portal",
+  description: "Browse all posted jobs and manage vacancies on KaamSaathi",
 };
 
 export default function PostJobs() {

@@ -40,7 +40,7 @@ const workerLinks = [
   },
   {
     id: 3,
-    name: "Applications",
+    name: "Applied",
     href: "/applications",
     icon: <NotepadTextIcon size={20} />,
     color: "text-violet-600",
@@ -71,9 +71,9 @@ const employerLinks = [
   },
   {
     id: 2,
-    name: "Post Job",
+    name: "All Jobs",
     href: "/post-job",
-    icon: <CloudUpload size={20} />,
+    icon: <Briefcase size={20} />,
     color: "text-emerald-600",
   },
   {
